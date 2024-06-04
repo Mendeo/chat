@@ -57,16 +57,16 @@ wss.on('connection', (ws) =>
 				{
 					list.push(_users_session_ids.get(userSessionId));
 				}
-				send(`${_users_session_ids.get(USER_SESSION_ID)}: /list: ${list.join(', ')}`);
+				sendMessageWithDateAndUserName(_users_session_ids.get(USER_SESSION_ID), `/list: ${list.join(', ')}`);
 			}
 			else
 			{
-				send(`${_users_session_ids.get(USER_SESSION_ID)}: ${data}`);
+				sendMessageWithDateAndUserName(_users_session_ids.get(USER_SESSION_ID), data);
 			}
 		}
 		else
 		{
-			ws.close(1008, 'Authentication required.')
+			ws.close(1008, 'Authentication required.');
 		}
 	});
 	ws.on('close', (code, reason) =>
@@ -79,6 +79,12 @@ wss.on('connection', (ws) =>
 		send(`Пользователь ${USER} вышел из чата. ${reason}`);
 	});
 });
+
+function sendMessageWithDateAndUserName(user, msg)
+{
+	const date = new Date().toLocaleString('ru-RU');
+	send(`${date} ${user}: ${msg}`);
+}
 
 function send(data)
 {

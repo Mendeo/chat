@@ -45,7 +45,20 @@ msgInput.addEventListener('input', ()=>
 msgInput.addEventListener('keydown', (e) =>
 {
 	if (e.code === 'Enter' || e.code === 'NumpadEnter')
-		{
-			submit.click();
-		}
+	{
+		submit.click();
+	}
 });
+
+const commandsButtons = document.querySelectorAll('#commands > button');
+const commands = ['/list'];
+for (let i = 0; i < commands.length; i++)
+{
+	const b = commandsButtons[i];
+	const c = commands[i];
+	b.addEventListener('click', () =>
+	{
+		msgInput.value = c;
+		submit.click();
+	});
+}
