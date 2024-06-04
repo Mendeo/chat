@@ -10,10 +10,13 @@
 	<link rel="icon" type="image/x-icon" href="favicon.ico">
 </head>
 <body>
-	<p>Приветствую тебя, <b>~%~</b>, в нашем уютном чатике!</p>
+	<p data-user-session-id="~%~">Приветствую тебя, <b>~%~</b>, в нашем уютном чатике!</p>
 	<textarea id="chat-area"></textarea><br>
-	<input type="text" id="input-text" name="msg" required>
-	<button id="submit" type="submit">Отправить</button>
+	<div class="input_area">
+		<input type="text" id="input-text" name="msg" required>
+		<button id="submit" type="submit">Отправить</button>
+	</div>
+
 	<script type="text/javascript" src="index.js"></script>
 </body>
 </html>

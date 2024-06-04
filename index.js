@@ -2,16 +2,18 @@
 const chatArea = document.getElementById('chat-area');
 const msgInput = document.getElementById('input-text');
 const submit = document.getElementById('submit');
+const USER_SESSION_ID = document.querySelector('[data-user-session-id]').getAttribute('data-user-session-id');
 
 chatArea.value = '';
 const socket = new WebSocket(`ws://${location.host}`);
 socket.addEventListener('open', ()=>
 {
+	socket.send(USER_SESSION_ID + '+');
 	submit.addEventListener('click', ()=>
 	{
 		if (msgInput.checkValidity())
 		{
-			socket.send(msgInput.value);
+			socket.send(USER_SESSION_ID + msgInput.value);
 			msgInput.value = '';
 		}
 	});

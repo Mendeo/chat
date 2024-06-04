@@ -1,0 +1,18 @@
+#chat-area
+{
+	width: 100%;
+	height: 70vh;
+}
+.input_area
+{
+	display: flex;
+	justify-content: space-between;
+}
+.input_area > input
+{
+	width: 100%;
+}
+.input_area > button
+{
+	margin-left: 1rem;
+}
