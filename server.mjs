@@ -72,11 +72,14 @@ wss.on('connection', (ws) =>
 	ws.on('close', (code, reason) =>
 	{
 		const USER_SESSION_ID = clients.get(ws);
-		const USER = _users_session_ids.get(USER_SESSION_ID);
-		clients.delete(ws);
-		_users_online.delete(USER_SESSION_ID);
-		_users_session_ids.delete(USER_SESSION_ID);
-		send(`Пользователь ${USER} вышел из чата. ${reason}`);
+		if (USER_SESSION_ID)
+		{
+			const USER = _users_session_ids.get(USER_SESSION_ID);
+			clients.delete(ws);
+			_users_online.delete(USER_SESSION_ID);
+			_users_session_ids.delete(USER_SESSION_ID);
+			send(`Пользователь ${USER} вышел из чата. ${reason}`);
+		}
 	});
 });
 
@@ -157,14 +160,23 @@ function app(req, res)
 		if (urlPath === '/') urlPath = '/index.html';
 		if (urlPath === '/index.html')
 		{
-			let UID = reverseGet(_users_session_ids, user);
-			if (!UID)
+			let USER_SESSION_ID = reverseGet(_users_session_ids, user);
+			if (USER_SESSION_ID)
 			{
-				UID = getUID(UID_LENGTH);
-				_users_session_ids.set(UID, user);
+				if (_users_online.has(USER_SESSION_ID)) //Пользователь уже имеет активный сокет.
+				{
+					const err = 'Данный пользователь уже авторизован. Параллельные сессии запрещены.';
+					error409(err, res);
+					return;
+				}
+			}
+			else
+			{
+				USER_SESSION_ID = getUID(UID_LENGTH);
+				_users_session_ids.set(USER_SESSION_ID, user);
 			}
 			const file = files.get(urlPath);
-			const data = Buffer.from(file.data[0] + UID + file.data[1] + user + file.data[2]);
+			const data = Buffer.from(file.data[0] + USER_SESSION_ID + file.data[1] + user + file.data[2]);
 			sendData(res, data, file.contentType, 200, 'no-store');
 		}
 		else if (files.has(urlPath))
@@ -190,7 +202,7 @@ function reverseGet(data, value) //Поиск по значению в Map
 
 function getUID(size)
 {
-	const alpabet = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
+	const alpabet = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
 	const bytes = new Uint8Array(crypto.randomBytes(size));
 	let UID = '';
 	for (let b of bytes)
@@ -204,11 +216,11 @@ function getUID(size)
 function sendData(res, data, contentType, code, cacheControl)
 {
 	res.writeHead(code,
-	{
-		'Content-Length': data.length,
-		'Content-Type': contentType,
-		'Cache-Control': cacheControl
-	});
+		{
+			'Content-Length': data.length,
+			'Content-Type': contentType,
+			'Cache-Control': cacheControl
+		});
 	res.end(data);
 }
 
@@ -217,6 +229,19 @@ function error404(err, res)
 	console.log('Not found: ' + err);
 	const file = files.get('/404.html');
 	sendData(res, file.data, file.contentType, 404, 'max-age: 86400, immutable');
+}
+
+function error409(err, res)
+{
+	console.log('Already authorized: ' + err);
+	const msgBytes = Buffer.from(err);
+	res.writeHead(409,
+		{
+			'Content-Length': msgBytes.byteLength,
+			'Content-Type': 'text/plain; charset=utf-8',
+			'Cache-Control': 'max-age: 86400, immutable'
+		});
+	res.end(msgBytes);
 }
 
 function md5(buffer)

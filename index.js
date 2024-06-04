@@ -18,7 +18,6 @@ socket.addEventListener('open', ()=>
 		}
 	});
 });
-
 socket.addEventListener('message', (e)=>
 {
 	chatArea.value += e.data + '\n';
