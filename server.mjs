@@ -49,7 +49,20 @@ wss.on('connection', (ws) =>
 				_users_online.add(USER_SESSION_ID);
 				clients.set(ws, USER_SESSION_ID);
 			}
-			send(`${_users_session_ids.get(USER_SESSION_ID)}: ${data.slice(UID_LENGTH)}`);
+			data = data.slice(UID_LENGTH);
+			if (data === '/list')
+			{
+				let list = [];
+				for (let userSessionId of _users_online.values())
+				{
+					list.push(_users_session_ids.get(userSessionId));
+				}
+				send(`${_users_session_ids.get(USER_SESSION_ID)}: /list: ${list.join(', ')}`);
+			}
+			else
+			{
+				send(`${_users_session_ids.get(USER_SESSION_ID)}: ${data}`);
+			}
 		}
 		else
 		{

@@ -18,6 +18,7 @@ socket.addEventListener('open', ()=>
 		}
 	});
 });
+
 socket.addEventListener('message', (e)=>
 {
 	chatArea.value += e.data + '\n';
@@ -40,4 +41,11 @@ socket.addEventListener('close', (e)=>
 msgInput.addEventListener('input', ()=>
 {
 	msgInput.reportValidity();
+});
+msgInput.addEventListener('keydown', (e) =>
+{
+	if (e.code === 'Enter' || e.code === 'NumpadEnter')
+		{
+			submit.click();
+		}
 });
