@@ -38,7 +38,9 @@ const _users_online = new Set(); //Пользователи, которые по
 
 wss.on('connection', (ws) =>
 {
+	ws.isAlive = true;
 	ws.on('error', console.error);
+	ws.on('pong', () => ws.isAlive = true);
 	ws.on('message', (data) =>
 	{
 		data = data.toString();
@@ -83,6 +85,7 @@ wss.on('connection', (ws) =>
 		}
 	});
 });
+watchDog();
 
 function sendMessageWithDateAndUserName(user, msg)
 {
@@ -96,6 +99,25 @@ function send(data)
 	{
 		ws.send(data);
 	}
+}
+
+function watchDog()
+{
+	setInterval(() =>
+	{
+		for (let ws of clients.keys())
+		{
+			if (!ws.isAlive)
+			{
+				ws.terminate();
+			}
+			else
+			{
+				ws.isAlive = false;
+				ws.ping();
+			}
+		}
+	}, 30000);
 }
 
 function app(req, res)
