@@ -61,3 +61,20 @@ for (let i = 0; i < commands.length; i++)
 		submit.click();
 	});
 }
+
+const inputFiles = document.getElementById('add-files');
+const filesList = document.querySelector('#files-list > ul');
+inputFiles.addEventListener('change', () =>
+{
+	for (let f of inputFiles.files)
+	{
+		const li = document.createElement('li');
+		const link = document.createElement('a');
+		link.innerText = f.name;
+		link.href = URL.createObjectURL(f);
+		link.download = f.name;
+		if (f.name.length > 20) link.title = f.name;
+		li.append(link);
+		filesList.append(li);
+	}
+});
