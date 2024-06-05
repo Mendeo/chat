@@ -5,6 +5,17 @@ const submit = document.getElementById('submit');
 const errorElement = document.getElementById('max-payload-size-exceeded-error');
 const USER_SESSION_ID = document.querySelector('[data-user-session-id]').getAttribute('data-user-session-id');
 const MAX_PAYLOAD = 100 * 1024 * 1024;
+const TITLE = 'Mendeo chat';
+let _titleChanged = false;
+
+window.addEventListener('focus', ()=>
+{
+	if (_titleChanged)
+	{
+		document.title = TITLE;
+		_titleChanged = false;
+	}
+});
 
 chatArea.value = '';
 const socket = new WebSocket(`ws://${location.host}`);
@@ -77,6 +88,11 @@ socket.addEventListener('message', (e)=>
 		chatArea.value += e.data + '\n';
 	}
 	chatArea.scrollTo(0, chatArea.scrollHeight);
+	if (document.hidden)
+	{
+		document.title = '***' + TITLE + '***';
+		_titleChanged = true;
+	}
 });
 socket.addEventListener('error', (e)=>
 {
