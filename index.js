@@ -2,7 +2,9 @@
 const chatArea = document.getElementById('chat-area');
 const msgInput = document.getElementById('input-text');
 const submit = document.getElementById('submit');
+const errorElement = document.getElementById('max-payload-size-exceeded-error');
 const USER_SESSION_ID = document.querySelector('[data-user-session-id]').getAttribute('data-user-session-id');
+const MAX_PAYLOAD = 100 * 1024 * 1024;
 
 chatArea.value = '';
 const socket = new WebSocket(`ws://${location.host}`);
@@ -13,8 +15,17 @@ socket.addEventListener('open', ()=>
 	{
 		if (msgInput.checkValidity())
 		{
-			socket.send(USER_SESSION_ID + msgInput.value);
-			msgInput.value = '';
+			const msg = USER_SESSION_ID + msgInput.value;
+			const msgSize = new TextEncoder().encode(msg).length;
+			if (msgSize <= MAX_PAYLOAD)
+			{
+				socket.send(msg);
+				msgInput.value = '';
+			}
+			else
+			{
+				showError(errorElement, 3000);
+			}
 		}
 	});
 	const inputFiles = document.getElementById('add-files');
@@ -26,9 +37,19 @@ socket.addEventListener('open', ()=>
 			r.readAsDataURL(f);
 			r.addEventListener('load', () =>
 			{
-				socket.send(`${USER_SESSION_ID}file:${f.name};${r.result}`);
+				const msg = `${USER_SESSION_ID}file:${f.name};${r.result}`;
+				const msgSize = new TextEncoder().encode(msg).length;
+				if (msgSize <= MAX_PAYLOAD)
+				{
+					socket.send(msg);
+				}
+				else
+				{
+					showError(errorElement, 3000);
+				}
 			});
 		}
+		inputFiles.value = '';
 	});
 });
 
@@ -95,4 +116,13 @@ for (let i = 0; i < commands.length; i++)
 		msgInput.value = c;
 		submit.click();
 	});
+}
+
+function showError(errorElement, timeout)
+{
+	errorElement.classList.remove('invisible');
+	setTimeout(() =>
+	{
+		errorElement.classList.add('invisible');
+	}, timeout);
 }

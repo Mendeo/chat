@@ -39,3 +39,14 @@
 	max-height: 70vh;
 	overflow-y: auto;
 }
+.error
+{
+	color: tomato;
+	font-weight: bold;
+	position: absolute;
+	margin-left: 0.5rem;
+}
+.invisible
+{
+	display: none;
+}

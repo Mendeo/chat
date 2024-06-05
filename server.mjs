@@ -28,7 +28,8 @@ let _lastIP = '';
 const USERS = JSON.parse(fs.readFileSync(path.join(__dirname, 'users.json')).toString());
 
 const server = createServer(app);
-const wss = new WebSocketServer({ server });
+const MAX_PAYLOAD = 100 * 1024 * 1024;
+const wss = new WebSocketServer({ server, maxPayload: MAX_PAYLOAD });
 server.listen(PORT);
 
 const clients = new Map();
