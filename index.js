@@ -37,7 +37,7 @@ socket.addEventListener('message', (e)=>
 {
 	const fileStart = e.data.indexOf('file:');
 	let linkStart = -1;
-	if (fileStart !== -1) linkStart = e.data.indexOf(';data:text/xml;base64,', fileStart);
+	if (fileStart !== -1) linkStart = e.data.indexOf(';data:', fileStart);
 	if (linkStart !== -1)
 	{
 		const fileName = e.data.slice(fileStart + 5, linkStart);
