@@ -89,7 +89,7 @@ watchDog();
 
 function sendMessageWithDateAndUserName(user, msg)
 {
-	const date = new Date().toLocaleString('ru-RU');
+	const date = new Date().toLocaleString('ru-RU', { hour: 'numeric', minute: 'numeric', second: 'numeric' });
 	send(`${date} ${user}: ${msg}`);
 }
 
