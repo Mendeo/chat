@@ -4,6 +4,7 @@ const msgInput = document.getElementById('input-text');
 const submit = document.getElementById('submit');
 const errorElement = document.getElementById('max-payload-size-exceeded-error');
 const USER_SESSION_ID = document.querySelector('[data-user-session-id]').getAttribute('data-user-session-id');
+const onmessageAudio = document.getElementById('onmessage-audio');
 const MAX_PAYLOAD = 100 * 1024 * 1024;
 const TITLE = 'Mendeo chat';
 let _titleChanged = false;
@@ -92,6 +93,7 @@ socket.addEventListener('message', (e)=>
 	{
 		document.title = '***' + TITLE + '***';
 		_titleChanged = true;
+		if (onmessageAudio) onmessageAudio.play();
 	}
 });
 socket.addEventListener('error', (e)=>

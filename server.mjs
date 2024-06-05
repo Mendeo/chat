@@ -21,6 +21,17 @@ files.set('/favicon.ico', { data: fs.readFileSync(path.join(__dirname, 'favicon.
 files.set('/robots.txt', { data: fs.readFileSync(path.join(__dirname, 'robots.txt')), contentType: 'text/plain; charset=utf-8' });
 files.set('/404.html', { data: fs.readFileSync(path.join(__dirname, '404.html')), contentType: 'text/html; charset=utf-8' });
 files.set('/404.css', { data: fs.readFileSync(path.join(__dirname, '404.css')), contentType: 'text/css; charset=utf-8' });
+let _hasOnMessage = false;
+try
+{
+	fs.accessSync(path.join(__dirname, 'onmessage.mp3'));
+	_hasOnMessage = true;
+}
+catch {}
+if (_hasOnMessage)
+{
+	files.set('/onmessage.mp3', { data: fs.readFileSync(path.join(__dirname, 'onmessage.mp3')), contentType: 'audio/mpeg' });
+}
 
 let _lastReqTime = new Date(0);
 let _lastIP = '';
@@ -199,7 +210,12 @@ function app(req, res)
 				_users_session_ids.set(USER_SESSION_ID, user);
 			}
 			const file = files.get(urlPath);
-			const data = Buffer.from(file.data[0] + USER_SESSION_ID + file.data[1] + user + file.data[2]);
+			let onmessageAudioTag = '';
+			if (_hasOnMessage)
+			{
+				onmessageAudioTag = '\t<audio id="onmessage-audio" src="onmessage.mp3" preload="auto"></audio>'
+			}
+			const data = Buffer.from(file.data[0] + USER_SESSION_ID + file.data[1] + user + file.data[2] + onmessageAudioTag + file.data[3]);
 			sendData(res, data, file.contentType, 200, 'no-store');
 		}
 		else if (files.has(urlPath))
