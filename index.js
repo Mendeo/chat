@@ -55,6 +55,7 @@ socket.addEventListener('message', (e)=>
 	{
 		chatArea.value += e.data + '\n';
 	}
+	chatArea.scrollTo(0, chatArea.scrollHeight);
 });
 socket.addEventListener('error', (e)=>
 {
