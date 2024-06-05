@@ -213,7 +213,7 @@ function app(req, res)
 			let onmessageAudioTag = '';
 			if (_hasOnMessage)
 			{
-				onmessageAudioTag = '\t<audio id="onmessage-audio" src="onmessage.mp3" preload="auto"></audio>'
+				onmessageAudioTag = '\n\t<audio id="onmessage-audio" src="onmessage.mp3" preload="auto"></audio>'
 			}
 			const data = Buffer.from(file.data[0] + USER_SESSION_ID + file.data[1] + user + file.data[2] + onmessageAudioTag + file.data[3]);
 			sendData(res, data, file.contentType, 200, 'no-store');
