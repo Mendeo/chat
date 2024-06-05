@@ -32,11 +32,11 @@
 	width: max-content;
 	max-width: 20rem;
 	margin-right: 1rem;
+	max-height: 70vh;
 }
 #files-list > ul
 {
 	word-wrap: break-word;
-	max-height: 70vh;
 	overflow-y: auto;
 }
 .error
@@ -49,4 +49,17 @@
 .invisible
 {
 	display: none;
+}
+
+@media screen and (max-width: 900px)
+{
+	.left_right
+	{
+		display: block;
+	}
+	#files-list
+	{
+		width: 100%;
+		max-height: none;
+	}
 }
