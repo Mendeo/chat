@@ -179,6 +179,11 @@ function app(req, res)
 			}
 		}
 	}
+	else if (urlPath === '/robots.txt')
+	{
+		const file = files.get(urlPath);
+		sendData(res, file.data, file.contentType, 200, 'max-age: 31536000, immutable');
+	}
 	else
 	{
 		authForm();
