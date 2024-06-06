@@ -52,6 +52,7 @@ const _users_online = new Set(); //Пользователи, которые по
 
 wss.on('connection', (ws) =>
 {
+	console.log(`${new Date().toLocaleString('ru-RU')}: New socket!`);
 	ws.isAlive = true;
 	ws.on('error', console.error);
 	ws.on('pong', () => ws.isAlive = true);
@@ -61,10 +62,12 @@ wss.on('connection', (ws) =>
 		const USER_SESSION_ID = data.slice(0, UID_LENGTH);
 		if (_users_session_ids.has(USER_SESSION_ID))
 		{
+			const username = _users_session_ids.get(USER_SESSION_ID);
 			if (!_users_online.has(USER_SESSION_ID))
 			{
 				_users_online.add(USER_SESSION_ID);
 				clients.set(ws, USER_SESSION_ID);
+				console.log(`${new Date().toLocaleString('ru-RU')}: User detected: ${username}`);
 			}
 			data = data.slice(UID_LENGTH);
 			if (data === '/list')
@@ -74,16 +77,17 @@ wss.on('connection', (ws) =>
 				{
 					list.push(_users_session_ids.get(userSessionId));
 				}
-				sendMessageWithDateAndUserName(_users_session_ids.get(USER_SESSION_ID), `/list: ${list.join(', ')}`);
+				sendMessageWithDateAndUserName(username, `/list: ${list.join(', ')}`);
 			}
 			else
 			{
-				sendMessageWithDateAndUserName(_users_session_ids.get(USER_SESSION_ID), data);
+				sendMessageWithDateAndUserName(username, data);
 			}
 		}
 		else
 		{
 			ws.close(1008, 'Authentication required.');
+			console.log(`${new Date().toLocaleString('ru-RU')}: Socket closed: user not detected!`);
 		}
 	});
 	ws.on('close', (code, reason) =>
@@ -91,11 +95,12 @@ wss.on('connection', (ws) =>
 		const USER_SESSION_ID = clients.get(ws);
 		if (USER_SESSION_ID)
 		{
-			const USER = _users_session_ids.get(USER_SESSION_ID);
+			const username = _users_session_ids.get(USER_SESSION_ID);
 			clients.delete(ws);
 			_users_online.delete(USER_SESSION_ID);
 			_users_session_ids.delete(USER_SESSION_ID);
-			send(`Пользователь ${USER} вышел из чата. ${reason}`);
+			send(`Пользователь ${username} вышел из чата. ${reason}`);
+			console.log(`${new Date().toLocaleString('ru-RU')}: Socket closed: user ${username} has left the chat.`);
 		}
 	});
 });
