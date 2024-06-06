@@ -21,13 +21,16 @@ files.set('/favicon.ico', { data: fs.readFileSync(path.join(__dirname, 'favicon.
 files.set('/robots.txt', { data: fs.readFileSync(path.join(__dirname, 'robots.txt')), contentType: 'text/plain; charset=utf-8' });
 files.set('/404.html', { data: fs.readFileSync(path.join(__dirname, '404.html')), contentType: 'text/html; charset=utf-8' });
 files.set('/404.css', { data: fs.readFileSync(path.join(__dirname, '404.css')), contentType: 'text/css; charset=utf-8' });
-let _hasOnMessage = false;
+let _hasOnMessage;
 try
 {
 	fs.accessSync(path.join(__dirname, 'onmessage.mp3'));
 	_hasOnMessage = true;
 }
-catch {}
+catch
+{
+	_hasOnMessage = false;
+}
 if (_hasOnMessage)
 {
 	files.set('/onmessage.mp3', { data: fs.readFileSync(path.join(__dirname, 'onmessage.mp3')), contentType: 'audio/mpeg' });
@@ -213,7 +216,7 @@ function app(req, res)
 			let onmessageAudioTag = '';
 			if (_hasOnMessage)
 			{
-				onmessageAudioTag = '\n\t<audio id="onmessage-audio" src="onmessage.mp3" preload="auto"></audio>'
+				onmessageAudioTag = '\n\t<audio id="onmessage-audio" src="onmessage.mp3" preload="auto"></audio>';
 			}
 			const data = Buffer.from(file.data[0] + USER_SESSION_ID + file.data[1] + user + file.data[2] + onmessageAudioTag + file.data[3]);
 			sendData(res, data, file.contentType, 200, 'no-store');
