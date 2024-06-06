@@ -89,12 +89,7 @@ socket.addEventListener('message', (e)=>
 		chatArea.value += e.data + '\n';
 	}
 	chatArea.scrollTo(0, chatArea.scrollHeight);
-	if (document.hidden)
-	{
-		document.title = '***' + TITLE + '***';
-		_titleChanged = true;
-		if (onmessageAudio) onmessageAudio.play();
-	}
+	notificate();
 });
 socket.addEventListener('error', (e)=>
 {
@@ -110,7 +105,7 @@ socket.addEventListener('close', (e)=>
 	{
 		chatArea.value += 'Соединение прервано';
 	}
-	if (document.hidden && onmessageAudio) onmessageAudio.play();
+	notificate();
 });
 msgInput.addEventListener('input', ()=>
 {
@@ -144,4 +139,14 @@ function showError(errorElement, timeout)
 	{
 		errorElement.classList.add('invisible');
 	}, timeout);
+}
+
+function notificate()
+{
+	if (document.hidden)
+	{
+		document.title = '***' + TITLE + '***';
+		_titleChanged = true;
+		if (onmessageAudio) onmessageAudio.play();
+	}
 }
