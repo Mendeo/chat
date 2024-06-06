@@ -110,6 +110,7 @@ socket.addEventListener('close', (e)=>
 	{
 		chatArea.value += 'Соединение прервано';
 	}
+	if (document.hidden && onmessageAudio) onmessageAudio.play();
 });
 msgInput.addEventListener('input', ()=>
 {
