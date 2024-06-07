@@ -53,6 +53,7 @@ socket.addEventListener('open', ()=>
 				const msgSize = new TextEncoder().encode(msg).length;
 				if (msgSize <= MAX_PAYLOAD)
 				{
+					socket.send(USER_SESSION_ID + 'Занят отправкой файла...');
 					socket.send(msg);
 				}
 				else
