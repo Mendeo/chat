@@ -79,9 +79,14 @@ wss.on('connection', (ws) =>
 				}
 				sendMessageWithDateAndUserName(username, `/list: ${list.join(', ')}`);
 			}
+			else if (data.startsWith('/sending-file:'))
+			{
+				const fileName = data.slice(14);
+				sendMessageWithDateAndUserName(username, `Отправляет файл "${fileName}"`);
+			}
 			else
 			{
-				sendMessageWithDateAndUserName(username, data);
+				sendMessageWithDateAndUserName(username, data, USER_SESSION_ID);
 			}
 		}
 		else
@@ -106,17 +111,26 @@ wss.on('connection', (ws) =>
 });
 watchDog();
 
-function sendMessageWithDateAndUserName(user, msg)
+function sendMessageWithDateAndUserName(username, msg, userSessionId_doNotSend)
 {
 	const date = new Date().toLocaleString('ru-RU', { hour: 'numeric', minute: 'numeric', second: 'numeric' });
-	send(`${date} ${user}: ${msg}`);
+	send(`${date} ${username}: ${msg}`, userSessionId_doNotSend);
 }
 
-function send(data)
+function send(data, userSessionId)
 {
-	for (let ws of clients.keys())
+	for (let c of clients)
 	{
-		ws.send(data);
+		const ws = c[0];
+		const sid = c[1];
+		if (sid === userSessionId)
+		{
+			ws.send(userSessionId + ':ok');
+		}
+		else
+		{
+			ws.send(data);
+		}
 	}
 }
 
@@ -124,11 +138,15 @@ function watchDog()
 {
 	setInterval(() =>
 	{
-		for (let ws of clients.keys())
+		for (let c of clients)
 		{
-			if (!ws.isAlive)
+			const ws = c[0];
+			const username = c[1];
+			if (!ws.isAlive && !ws._receiver._payloadLength)
 			{
 				ws.terminate();
+				clients.delete(ws);
+				console.log(`User ${username} was  terminated by timeout`);
 			}
 			else
 			{
@@ -159,14 +177,14 @@ function app(req, res)
 		else
 		{
 			const cred = Buffer.from(data[1], 'base64').toString().split(':');
-			const user = cred[0];
+			const username = cred[0];
 			const password = cred[1];
-			if (USERS[user])
+			if (USERS[username])
 			{
 				const passwordInMd5 = Buffer.from(md5(Buffer.from(password))).toString('hex');
-				if (USERS[user] === passwordInMd5)
+				if (USERS[username] === passwordInMd5)
 				{
-					normalWork(res, urlPath, user);
+					normalWork(res, urlPath, username);
 				}
 				else
 				{
@@ -202,12 +220,12 @@ function app(req, res)
 		res.end(msg);
 	}
 
-	function normalWork(res, urlPath, user)
+	function normalWork(res, urlPath, username)
 	{
 		if (urlPath === '/') urlPath = '/index.html';
 		if (urlPath === '/index.html')
 		{
-			let USER_SESSION_ID = reverseGet(_users_session_ids, user);
+			let USER_SESSION_ID = reverseGet(_users_session_ids, username);
 			if (USER_SESSION_ID)
 			{
 				if (_users_online.has(USER_SESSION_ID)) //Пользователь уже имеет активный сокет.
@@ -220,7 +238,7 @@ function app(req, res)
 			else
 			{
 				USER_SESSION_ID = getUID(UID_LENGTH);
-				_users_session_ids.set(USER_SESSION_ID, user);
+				_users_session_ids.set(USER_SESSION_ID, username);
 			}
 			const file = files.get(urlPath);
 			let onmessageAudioTag = '';
@@ -228,7 +246,7 @@ function app(req, res)
 			{
 				onmessageAudioTag = '\n\t<audio id="onmessage-audio" src="onmessage.mp3" preload="auto"></audio>';
 			}
-			const data = Buffer.from(file.data[0] + USER_SESSION_ID + file.data[1] + user + file.data[2] + onmessageAudioTag + file.data[3]);
+			const data = Buffer.from(file.data[0] + username + file.data[1] + USER_SESSION_ID + file.data[2] + username + file.data[3] + onmessageAudioTag + file.data[4]);
 			sendData(res, data, file.contentType, 200, 'no-store');
 		}
 		else if (files.has(urlPath))

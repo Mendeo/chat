@@ -50,6 +50,25 @@
 {
 	display: none;
 }
+.status
+{
+	width: 0.7rem;
+	height: 0.7rem;
+	border-radius: 50%;
+	margin-right: 0.5rem;
+}
+.status__in_progress
+{
+	background-color: gray;
+}
+.status__delivered
+{
+	background-color: green;
+}
+.status__no_connected
+{
+	background-color: red;
+}
 
 @media screen and (max-width: 900px)
 {

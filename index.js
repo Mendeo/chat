@@ -3,11 +3,18 @@ const chatArea = document.getElementById('chat-area');
 const msgInput = document.getElementById('input-text');
 const submit = document.getElementById('submit');
 const errorElement = document.getElementById('max-payload-size-exceeded-error');
-const USER_SESSION_ID = document.querySelector('[data-user-session-id]').getAttribute('data-user-session-id');
+const dataElement = document.querySelector('[data-user-session-id]');
+const USER_SESSION_ID = dataElement.getAttribute('data-user-session-id');
+const USER_NAME = dataElement.getAttribute('data-user-name');
 const onmessageAudio = document.getElementById('onmessage-audio');
+const statusElement = document.querySelector('.status');
+const filesList = document.querySelector('#files-list > ul');
 const MAX_PAYLOAD = 100 * 1024 * 1024;
 const TITLE = 'Mendeo chat';
 let _titleChanged = false;
+const STATUS_NO_CONNECTED = 0;
+const STATUS_IN_PROGRESS = 1;
+const STATUS_DELIVERED = 2;
 
 window.addEventListener('focus', ()=>
 {
@@ -23,6 +30,7 @@ const socket = new WebSocket(`ws://${location.host}`);
 socket.addEventListener('open', ()=>
 {
 	socket.send(USER_SESSION_ID + '+');
+	deliveredStatus(STATUS_DELIVERED);
 	submit.addEventListener('click', ()=>
 	{
 		if (msgInput.checkValidity())
@@ -32,6 +40,11 @@ socket.addEventListener('open', ()=>
 			if (msgSize <= MAX_PAYLOAD)
 			{
 				socket.send(msg);
+				if (msgInput.value[0] !== '/')
+				{
+					showMessageWithDateAndUserName(msgInput.value);
+					deliveredStatus(STATUS_IN_PROGRESS);
+				}
 				msgInput.value = '';
 			}
 			else
@@ -53,8 +66,10 @@ socket.addEventListener('open', ()=>
 				const msgSize = new TextEncoder().encode(msg).length;
 				if (msgSize <= MAX_PAYLOAD)
 				{
-					socket.send(USER_SESSION_ID + 'Занят отправкой файла...');
+					deliveredStatus(STATUS_IN_PROGRESS);
+					socket.send(`${USER_SESSION_ID}/sending-file:${f.name}`);
 					socket.send(msg);
+					createFileLink(f.name, r.result);
 				}
 				else
 				{
@@ -66,31 +81,31 @@ socket.addEventListener('open', ()=>
 	});
 });
 
-const filesList = document.querySelector('#files-list > ul');
 socket.addEventListener('message', (e)=>
 {
-	const fileStart = e.data.indexOf('file:');
-	let linkStart = -1;
-	if (fileStart !== -1) linkStart = e.data.indexOf(';data:', fileStart);
-	if (linkStart !== -1)
+	if (e.data === `${USER_SESSION_ID}:ok`)
 	{
-		const fileName = e.data.slice(fileStart + 5, linkStart);
-		chatArea.value += `${e.data.slice(0, fileStart)}Отправлен файл "${fileName}"\n`;
-		const li = document.createElement('li');
-		const link = document.createElement('a');
-		link.innerText = fileName;
-		link.href = e.data.slice(linkStart + 1);
-		link.download = fileName;
-		if (fileName.length > 20) link.title = fileName;
-		li.append(link);
-		filesList.append(li);
+		deliveredStatus(STATUS_DELIVERED);
 	}
 	else
 	{
-		chatArea.value += e.data + '\n';
+		const fileStart = e.data.indexOf('file:');
+		let linkStart = -1;
+		if (fileStart !== -1) linkStart = e.data.indexOf(';data:', fileStart);
+		if (linkStart !== -1)
+		{
+			const fileName = e.data.slice(fileStart + 5, linkStart);
+			chatArea.value += `${e.data.slice(0, fileStart)}Отправлен файл "${fileName}"\n`;
+			const href = e.data.slice(linkStart + 1);
+			createFileLink(fileName, href);
+		}
+		else
+		{
+			chatArea.value += e.data + '\n';
+		}
+		chatArea.scrollTo(0, chatArea.scrollHeight);
+		notificate();
 	}
-	chatArea.scrollTo(0, chatArea.scrollHeight);
-	notificate();
 });
 socket.addEventListener('error', (e)=>
 {
@@ -106,6 +121,7 @@ socket.addEventListener('close', (e)=>
 	{
 		chatArea.value += 'Соединение прервано';
 	}
+	deliveredStatus(STATUS_NO_CONNECTED);
 	notificate();
 });
 msgInput.addEventListener('input', ()=>
@@ -150,4 +166,44 @@ function notificate()
 		_titleChanged = true;
 		if (onmessageAudio) onmessageAudio.play();
 	}
+}
+
+function showMessageWithDateAndUserName(msg)
+{
+	const date = new Date().toLocaleString('ru-RU', { hour: 'numeric', minute: 'numeric', second: 'numeric' });
+	chatArea.value += `${date} ${USER_NAME}: ${msg}\n`;
+}
+
+function deliveredStatus(status)
+{
+	if (status === STATUS_IN_PROGRESS)
+	{
+		statusElement.classList.remove('status__delivered');
+		statusElement.classList.remove('status__no_connected');
+		statusElement.classList.add('status__in_progress');
+	}
+	else if (status === STATUS_DELIVERED)
+	{
+		statusElement.classList.remove('status__in_progress');
+		statusElement.classList.remove('status__no_connected');
+		statusElement.classList.add('status__delivered');
+	}
+	else if (status === STATUS_NO_CONNECTED)
+	{
+		statusElement.classList.remove('status__delivered');
+		statusElement.classList.remove('status__in_progress');
+		statusElement.classList.add('status__no_connected');
+	}
+}
+
+function createFileLink(fileName, href)
+{
+	const li = document.createElement('li');
+	const link = document.createElement('a');
+	link.innerText = fileName;
+	link.href = href;
+	link.download = fileName;
+	if (fileName.length > 20) link.title = fileName;
+	li.append(link);
+	filesList.append(li);
 }
