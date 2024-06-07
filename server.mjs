@@ -70,16 +70,16 @@ wss.on('connection', (ws) =>
 				console.log(`${new Date().toLocaleString('ru-RU')}: User detected: ${username}`);
 			}
 			data = data.slice(UID_LENGTH);
-			if (data === '/list')
+			if (data === ':list')
 			{
 				let list = [];
 				for (let userSessionId of _users_online.values())
 				{
 					list.push(_users_session_ids.get(userSessionId));
 				}
-				sendMessageWithDateAndUserName(username, `/list: ${list.join(', ')}`);
+				sendMessageWithDateAndUserName(username, `:list: ${list.join(', ')}`);
 			}
-			else if (data.startsWith('/sending-file:'))
+			else if (data.startsWith(':sending-file:'))
 			{
 				const fileName = data.slice(14);
 				sendMessageWithDateAndUserName(username, `Отправляет файл "${fileName}"`);

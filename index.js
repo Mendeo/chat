@@ -40,7 +40,7 @@ socket.addEventListener('open', ()=>
 			if (msgSize <= MAX_PAYLOAD)
 			{
 				socket.send(msg);
-				if (msgInput.value[0] !== '/')
+				if (msgInput.value[0] !== ':')
 				{
 					showMessageWithDateAndUserName(msgInput.value);
 					deliveredStatus(STATUS_IN_PROGRESS);
@@ -67,7 +67,7 @@ socket.addEventListener('open', ()=>
 				if (msgSize <= MAX_PAYLOAD)
 				{
 					deliveredStatus(STATUS_IN_PROGRESS);
-					socket.send(`${USER_SESSION_ID}/sending-file:${f.name}`);
+					socket.send(`${USER_SESSION_ID}:sending-file:${f.name}`);
 					socket.send(msg);
 					createFileLink(f.name, r.result);
 				}
@@ -137,7 +137,7 @@ msgInput.addEventListener('keydown', (e) =>
 });
 
 const commandsButtons = document.querySelectorAll('#commands > button');
-const commands = ['/list'];
+const commands = [':list'];
 for (let i = 0; i < commands.length; i++)
 {
 	const b = commandsButtons[i];
