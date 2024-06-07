@@ -141,12 +141,21 @@ function watchDog()
 		for (let c of clients)
 		{
 			const ws = c[0];
-			const username = c[1];
-			if (!ws.isAlive && !ws._receiver._payloadLength)
+			const userSessionId = c[1];
+			if (!ws.isAlive)
 			{
-				ws.terminate();
-				clients.delete(ws);
-				console.log(`User ${username} was  terminated by timeout`);
+				const username = _users_session_ids.get(userSessionId);
+				if (ws._receiver._payloadLength)
+				{
+					send(`Пользователь ${username} ещё не получил все данные, ожидаем...`, userSessionId);
+				}
+				else
+				{
+					ws.terminate();
+					clients.delete(ws);
+					send(`Пользователь ${username} был отключён по таймауту.`, userSessionId);
+					console.log(`User ${username} was  terminated by timeout.`);
+				}
 			}
 			else
 			{
