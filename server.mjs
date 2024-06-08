@@ -82,11 +82,11 @@ wss.on('connection', (ws) =>
 			else if (data.startsWith(':sending-file:'))
 			{
 				const fileName = data.slice(14);
-				sendMessageWithDateAndUserName(username, `Отправляет файл "${fileName}"`);
+				sendMessageWithDateAndUserName(username, `Отправляет файл "${fileName}" и поэтому не сможет пока отвечать.`);
 			}
 			else
 			{
-				sendMessageWithDateAndUserName(username, data, USER_SESSION_ID);
+				sendMessageWithDateAndUserName(username, data, ws);
 			}
 		}
 		else
@@ -111,25 +111,40 @@ wss.on('connection', (ws) =>
 });
 watchDog();
 
-function sendMessageWithDateAndUserName(username, msg, userSessionId_doNotSend)
+function sendMessageWithDateAndUserName(username, msg, webSocket_doNotSend)
 {
 	const date = new Date().toLocaleString('ru-RU', { hour: 'numeric', minute: 'numeric', second: 'numeric' });
-	send(`${date} ${username}: ${msg}`, userSessionId_doNotSend);
+	send(`${date} ${username}: ${msg}`, webSocket_doNotSend);
 }
 
-function send(data, userSessionId)
+function send(data, senderWebSocket)
 {
+	let senderSessionId = senderWebSocket ? clients.get(senderWebSocket) : null;
+	if (senderWebSocket) senderWebSocket.send(senderSessionId + ':onserver');
+	let deliveredCount = clients.size - 1;
 	for (let c of clients)
 	{
 		const ws = c[0];
 		const sid = c[1];
-		if (sid === userSessionId)
+		if (sid !== senderSessionId)
 		{
-			ws.send(userSessionId + ':ok');
+			ws.inProgress = true;
+			ws.send(data, () =>
+			{
+				ws.inProgress = false;
+				if (senderWebSocket)
+				{
+					deliveredCount--;
+					if (deliveredCount === 0)
+					{
+						senderWebSocket.send(senderSessionId + ':onall');
+					}
+				}
+			});
 		}
-		else
+		else if (deliveredCount === 0)
 		{
-			ws.send(data);
+			senderWebSocket.send(senderSessionId + ':onall');
 		}
 	}
 }
@@ -145,15 +160,15 @@ function watchDog()
 			if (!ws.isAlive)
 			{
 				const username = _users_session_ids.get(userSessionId);
-				if (ws._receiver._payloadLength)
+				if (ws.inProgress || ws._receiver._payloadLength)
 				{
-					send(`Пользователь ${username} ещё не получил все данные, ожидаем...`, userSessionId);
+					send(`Пользователь ${username} ещё не получил все данные, ожидаем...`);
 				}
 				else
 				{
 					ws.terminate();
 					clients.delete(ws);
-					send(`Пользователь ${username} был отключён по таймауту.`, userSessionId);
+					send(`Пользователь ${username} был отключён по таймауту.`);
 					console.log(`User ${username} was  terminated by timeout.`);
 				}
 			}

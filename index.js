@@ -14,7 +14,8 @@ const TITLE = 'Mendeo chat';
 let _titleChanged = false;
 const STATUS_NO_CONNECTED = 0;
 const STATUS_IN_PROGRESS = 1;
-const STATUS_DELIVERED = 2;
+const STATUS_DELIVERED_TO_SERVER = 2;
+const STATUS_DELIVERED_TO_ALL = 3;
 
 window.addEventListener('focus', ()=>
 {
@@ -30,7 +31,7 @@ const socket = new WebSocket(`ws://${location.host}`);
 socket.addEventListener('open', ()=>
 {
 	socket.send(USER_SESSION_ID + '+');
-	deliveredStatus(STATUS_DELIVERED);
+	deliveredStatus(STATUS_DELIVERED_TO_ALL);
 	submit.addEventListener('click', ()=>
 	{
 		if (msgInput.checkValidity())
@@ -83,9 +84,13 @@ socket.addEventListener('open', ()=>
 
 socket.addEventListener('message', (e)=>
 {
-	if (e.data === `${USER_SESSION_ID}:ok`)
+	if (e.data === `${USER_SESSION_ID}:onserver`)
 	{
-		deliveredStatus(STATUS_DELIVERED);
+		deliveredStatus(STATUS_DELIVERED_TO_SERVER);
+	}
+	else if (e.data === `${USER_SESSION_ID}:onall`)
+	{
+		deliveredStatus(STATUS_DELIVERED_TO_ALL);
 	}
 	else
 	{
@@ -95,7 +100,7 @@ socket.addEventListener('message', (e)=>
 		if (linkStart !== -1)
 		{
 			const fileName = e.data.slice(fileStart + 5, linkStart);
-			chatArea.value += `${e.data.slice(0, fileStart)}Отправлен файл "${fileName}"\n`;
+			chatArea.value += `${e.data.slice(0, fileStart)}Отправлен файл "${fileName}".\n`;
 			const href = e.data.slice(linkStart + 1);
 			createFileLink(fileName, href);
 		}
@@ -178,19 +183,29 @@ function deliveredStatus(status)
 {
 	if (status === STATUS_IN_PROGRESS)
 	{
-		statusElement.classList.remove('status__delivered');
+		statusElement.classList.remove('status__delivered_to_server');
+		statusElement.classList.remove('status__delivered_to_all');
 		statusElement.classList.remove('status__no_connected');
 		statusElement.classList.add('status__in_progress');
 	}
-	else if (status === STATUS_DELIVERED)
+	else if (status === STATUS_DELIVERED_TO_SERVER)
 	{
 		statusElement.classList.remove('status__in_progress');
+		statusElement.classList.remove('status__delivered_to_all');
 		statusElement.classList.remove('status__no_connected');
-		statusElement.classList.add('status__delivered');
+		statusElement.classList.add('status__delivered_to_server');
+	}
+	else if (status === STATUS_DELIVERED_TO_ALL)
+	{
+		statusElement.classList.remove('status__delivered_to_server');
+		statusElement.classList.remove('status__in_progress');
+		statusElement.classList.remove('status__no_connected');
+		statusElement.classList.add('status__delivered_to_all');
 	}
 	else if (status === STATUS_NO_CONNECTED)
 	{
-		statusElement.classList.remove('status__delivered');
+		statusElement.classList.remove('status__delivered_to_server');
+		statusElement.classList.remove('status__delivered_to_all');
 		statusElement.classList.remove('status__in_progress');
 		statusElement.classList.add('status__no_connected');
 	}

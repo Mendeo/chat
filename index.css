@@ -61,7 +61,11 @@
 {
 	background-color: gray;
 }
-.status__delivered
+.status__delivered_to_server
+{
+	background-color: yellow;
+}
+.status__delivered_to_all
 {
 	background-color: green;
 }
