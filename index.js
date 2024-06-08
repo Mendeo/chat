@@ -17,6 +17,8 @@ const STATUS_IN_PROGRESS = 1;
 const STATUS_DELIVERED_TO_SERVER = 2;
 const STATUS_DELIVERED_TO_ALL = 3;
 
+const INPUT_HISTORY_LENGTH = 10;
+
 window.addEventListener('focus', ()=>
 {
 	if (_titleChanged)
@@ -45,6 +47,7 @@ socket.addEventListener('open', ()=>
 				{
 					showMessageWithDateAndUserName(msgInput.value);
 					setDeliveredStatus(STATUS_IN_PROGRESS);
+					queueSet(msgInput.value);
 				}
 				msgInput.value = '';
 			}
@@ -129,15 +132,41 @@ socket.addEventListener('close', (e)=>
 	setDeliveredStatus(STATUS_NO_CONNECTED);
 	notificate();
 });
+let _histCount = 0; //Счётчик нажатия кнопки вверх или вниз.
 msgInput.addEventListener('input', ()=>
 {
 	msgInput.reportValidity();
+	_histCount = 0;
 });
 msgInput.addEventListener('keydown', (e) =>
 {
 	if (e.code === 'Enter' || e.code === 'NumpadEnter')
 	{
 		submit.click();
+	}
+});
+msgInput.addEventListener('keydown', (e) =>
+{
+	if (e.code === 'ArrowUp')
+	{
+		if (_histCount < INPUT_HISTORY_LENGTH)
+		{
+			const hist = queueGet(_histCount);
+			_histCount++;
+			if (hist) msgInput.value = hist;
+		}
+	}
+});
+msgInput.addEventListener('keydown', (e) =>
+{
+	if (e.code === 'ArrowDown')
+	{
+		if (_histCount > 0)
+		{
+			_histCount--;
+			const hist = queueGet(_histCount);
+			if (hist) msgInput.value = hist;
+		}
 	}
 });
 
@@ -221,4 +250,32 @@ function createFileLink(fileName, href)
 	if (fileName.length > 20) link.title = fileName;
 	li.append(link);
 	filesList.append(li);
+}
+
+const _queue = new Array(INPUT_HISTORY_LENGTH);
+let _queueShift = 0;
+
+function queueSet(data)
+{
+	if (queueHas(data)) return;
+	_queue[_queueShift] = data;
+	console.log(_queueShift);
+	_queueShift++;
+	if (_queueShift === _queue.length) _queueShift = 0;
+}
+
+function queueHas(data)
+{
+	for (let q of _queue)
+	{
+		if (q === data) return true;
+	}
+	return false;
+}
+
+function queueGet(index)
+{
+	let arrayIndex = _queueShift - 1 - index;
+	if (arrayIndex < 0) arrayIndex = _queue.length + arrayIndex;
+	return _queue[arrayIndex];
 }
