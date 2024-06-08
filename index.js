@@ -31,7 +31,7 @@ const socket = new WebSocket(`ws://${location.host}`);
 socket.addEventListener('open', ()=>
 {
 	socket.send(USER_SESSION_ID + '+');
-	deliveredStatus(STATUS_DELIVERED_TO_ALL);
+	setDeliveredStatus(STATUS_DELIVERED_TO_ALL);
 	submit.addEventListener('click', ()=>
 	{
 		if (msgInput.checkValidity())
@@ -44,7 +44,7 @@ socket.addEventListener('open', ()=>
 				if (msgInput.value[0] !== ':')
 				{
 					showMessageWithDateAndUserName(msgInput.value);
-					deliveredStatus(STATUS_IN_PROGRESS);
+					setDeliveredStatus(STATUS_IN_PROGRESS);
 				}
 				msgInput.value = '';
 			}
@@ -67,7 +67,7 @@ socket.addEventListener('open', ()=>
 				const msgSize = new TextEncoder().encode(msg).length;
 				if (msgSize <= MAX_PAYLOAD)
 				{
-					deliveredStatus(STATUS_IN_PROGRESS);
+					setDeliveredStatus(STATUS_IN_PROGRESS);
 					socket.send(`${USER_SESSION_ID}:sending-file:${f.name}`);
 					socket.send(msg);
 					createFileLink(f.name, r.result);
@@ -86,11 +86,11 @@ socket.addEventListener('message', (e)=>
 {
 	if (e.data === `${USER_SESSION_ID}:onserver`)
 	{
-		deliveredStatus(STATUS_DELIVERED_TO_SERVER);
+		setDeliveredStatus(STATUS_DELIVERED_TO_SERVER);
 	}
 	else if (e.data === `${USER_SESSION_ID}:onall`)
 	{
-		deliveredStatus(STATUS_DELIVERED_TO_ALL);
+		setDeliveredStatus(STATUS_DELIVERED_TO_ALL);
 	}
 	else
 	{
@@ -126,7 +126,7 @@ socket.addEventListener('close', (e)=>
 	{
 		chatArea.value += 'Соединение прервано';
 	}
-	deliveredStatus(STATUS_NO_CONNECTED);
+	setDeliveredStatus(STATUS_NO_CONNECTED);
 	notificate();
 });
 msgInput.addEventListener('input', ()=>
@@ -179,7 +179,7 @@ function showMessageWithDateAndUserName(msg)
 	chatArea.value += `${date} ${USER_NAME}: ${msg}\n`;
 }
 
-function deliveredStatus(status)
+function setDeliveredStatus(status)
 {
 	if (status === STATUS_IN_PROGRESS)
 	{
