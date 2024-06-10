@@ -54,7 +54,11 @@ wss.on('connection', (ws) =>
 {
 	console.log(`${new Date().toLocaleString('ru-RU')}: New socket!`);
 	ws.isAlive = true;
-	ws.on('error', console.error);
+	ws.on('error', (err) =>
+	{
+		console.error(err);
+		ws.inProgress = false;
+	});
 	ws.on('pong', () => ws.isAlive = true);
 	ws.on('message', (data) =>
 	{
