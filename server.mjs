@@ -108,7 +108,7 @@ wss.on('connection', (ws) =>
 			clients.delete(ws);
 			_users_online.delete(USER_SESSION_ID);
 			_users_session_ids.delete(USER_SESSION_ID);
-			send(`Пользователь ${username} вышел из чата. ${reason}`);
+			sendMessageWithDateAndUserName('Server', `Пользователь ${username} вышел из чата. ${reason}`);
 			console.log(`${new Date().toLocaleString('ru-RU')}: Socket closed: user ${username} has left the chat.`);
 		}
 	});
@@ -166,14 +166,14 @@ function watchDog()
 				const username = _users_session_ids.get(userSessionId);
 				if (ws.inProgress) //|| ws._receiver._payloadLength
 				{
-					send(`Пользователь ${username} ещё не получил все данные, ожидаем...`);
+					sendMessageWithDateAndUserName('Server', `Пользователь ${username} ещё не получил все данные, ожидаем...`);
 				}
 				else
 				{
-					ws.terminate();
 					clients.delete(ws);
-					send(`Пользователь ${username} был отключён по таймауту.`);
-					console.log(`User ${username} was  terminated by timeout.`);
+					ws.terminate();
+					sendMessageWithDateAndUserName('Server', `Пользователь ${username} был отключён по таймауту.`);
+					console.log(`${new Date().toLocaleString('ru-RU', { hour: 'numeric', minute: 'numeric', second: 'numeric' })}: User ${username} was  terminated by timeout.`);
 				}
 			}
 			else
