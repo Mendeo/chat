@@ -164,7 +164,7 @@ function watchDog()
 			if (!ws.isAlive)
 			{
 				const username = _users_session_ids.get(userSessionId);
-				if (ws.inProgress || ws._receiver._payloadLength)
+				if (ws.inProgress) //|| ws._receiver._payloadLength
 				{
 					send(`Пользователь ${username} ещё не получил все данные, ожидаем...`);
 				}
