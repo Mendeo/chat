@@ -171,6 +171,8 @@ function watchDog()
 				else
 				{
 					clients.delete(ws);
+					_users_online.delete(userSessionId);
+					_users_session_ids.delete(userSessionId);
 					ws.terminate();
 					sendMessageWithDateAndUserName('Server', `Пользователь ${username} был отключён по таймауту.`);
 					console.log(`${new Date().toLocaleString('ru-RU', { hour: 'numeric', minute: 'numeric', second: 'numeric' })}: User ${username} was  terminated by timeout.`);
