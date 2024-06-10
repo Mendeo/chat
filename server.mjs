@@ -108,7 +108,7 @@ wss.on('connection', (ws) =>
 			clients.delete(ws);
 			_users_online.delete(USER_SESSION_ID);
 			_users_session_ids.delete(USER_SESSION_ID);
-			sendMessageWithDateAndUserName('Server', `Пользователь ${username} вышел из чата. ${reason}`);
+			sendMessageWithDateAndUserName('Server', `Пользователь ${username} вышел из чата.`);
 			console.log(`${new Date().toLocaleString('ru-RU')}: Socket closed: user ${username} has left the chat.`);
 		}
 	});
