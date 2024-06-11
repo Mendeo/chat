@@ -151,6 +151,7 @@ msgInput.addEventListener('keydown', (e) =>
 {
 	if (e.code === 'ArrowUp')
 	{
+		e.preventDefault();
 		if (_histCount < INPUT_HISTORY_LENGTH)
 		{
 			const hist = queueGet(_histCount);
@@ -158,11 +159,9 @@ msgInput.addEventListener('keydown', (e) =>
 			if (hist) msgInput.value = hist;
 		}
 	}
-});
-msgInput.addEventListener('keydown', (e) =>
-{
-	if (e.code === 'ArrowDown')
+	else if (e.code === 'ArrowDown')
 	{
+		e.preventDefault();
 		if (_histCount > 0)
 		{
 			_histCount--;
