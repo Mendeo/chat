@@ -182,7 +182,7 @@ function watchDog()
 				ws.ping();
 			}
 		}
-	}, 30000);
+	}, 29000);
 }
 
 function app(req, res)
