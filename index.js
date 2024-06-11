@@ -213,7 +213,6 @@ function showMessageWithDateAndUserName(msg)
 
 function setDeliveredStatus(status)
 {
-	console.log(`status=${status}`);
 	if (status === STATUS_IN_PROGRESS)
 	{
 		statusElement.classList.remove('status__delivered_to_server');
