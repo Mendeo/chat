@@ -24,14 +24,17 @@ let _current_input_history_size = 0;
 let _histCount = -1; //Счётчик нажатия кнопки вверх или вниз.
 let _lastMessageTime = Date.now();
 
-window.addEventListener('focus', ()=>
+window.addEventListener('focus', onUserActive);
+window.addEventListener('click', onUserActive);
+
+function onUserActive()
 {
 	if (_titleChanged)
 	{
 		document.title = TITLE;
 		_titleChanged = false;
 	}
-});
+}
 
 chatArea.value = '';
 const socket = new WebSocket(`ws://${location.host}`);
