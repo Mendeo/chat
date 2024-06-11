@@ -119,13 +119,13 @@ watchDog();
 function sendMessageWithDateAndUserName(username, msg, webSocket_doNotSend)
 {
 	const date = new Date().toLocaleString('ru-RU', { hour: 'numeric', minute: 'numeric', second: 'numeric' });
-	send(`${date} ${username}: ${msg}`, webSocket_doNotSend);
+	send(`${date} ${username}: ${msg}`, webSocket_doNotSend, msg.length);
 }
 
-function send(data, senderWebSocket)
+function send(data, senderWebSocket, rawMsgLength)
 {
 	let senderSessionId = senderWebSocket ? clients.get(senderWebSocket) : null;
-	if (senderWebSocket && data.length >= MIN_MESSAGE_LENGTH_TO_CONFIRM) senderWebSocket.send(senderSessionId + ':onserver');
+	if (senderWebSocket && rawMsgLength >= MIN_MESSAGE_LENGTH_TO_CONFIRM) senderWebSocket.send(senderSessionId + ':onserver');
 	let deliveredCount = clients.size - 1;
 	for (let c of clients)
 	{
@@ -137,7 +137,7 @@ function send(data, senderWebSocket)
 			ws.send(data, () =>
 			{
 				ws.inProgress = false;
-				if (senderWebSocket && data.length >= MIN_MESSAGE_LENGTH_TO_CONFIRM)
+				if (senderWebSocket && rawMsgLength >= MIN_MESSAGE_LENGTH_TO_CONFIRM)
 				{
 					deliveredCount--;
 					if (deliveredCount === 0) senderWebSocket.send(senderSessionId + ':onall');

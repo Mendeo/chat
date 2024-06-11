@@ -37,6 +37,7 @@ socket.addEventListener('open', ()=>
 	setDeliveredStatus(STATUS_DELIVERED_TO_ALL);
 	submit.addEventListener('click', ()=>
 	{
+		_histCount = 0; //Сбрасываем листатель истории, чтобы по стрелочке вверх ввелась предыдущая команда.
 		if (msgInput.checkValidity())
 		{
 			const msg = USER_SESSION_ID + msgInput.value;
@@ -212,6 +213,7 @@ function showMessageWithDateAndUserName(msg)
 
 function setDeliveredStatus(status)
 {
+	console.log(`status=${status}`);
 	if (status === STATUS_IN_PROGRESS)
 	{
 		statusElement.classList.remove('status__delivered_to_server');
@@ -261,7 +263,6 @@ function queueSet(data)
 {
 	if (queueHas(data)) return;
 	_queue[_queueShift] = data;
-	console.log(_queueShift);
 	_queueShift++;
 	if (_queueShift === _queue.length) _queueShift = 0;
 }
