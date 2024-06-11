@@ -18,8 +18,11 @@ const STATUS_DELIVERED_TO_SERVER = 2;
 const STATUS_DELIVERED_TO_ALL = 3;
 
 const INPUT_HISTORY_LENGTH = 30;
+const TIME_FROM_PREVIOUS_MESSAGE_TO_NOTIFICATE = 30000;
+
 let _current_input_history_size = 0;
 let _histCount = -1; //Счётчик нажатия кнопки вверх или вниз.
+let _lastMessageTime = Date.now();
 
 window.addEventListener('focus', ()=>
 {
@@ -199,12 +202,14 @@ function showError(errorElement, timeout)
 
 function notificate()
 {
-	if (document.hidden)
+	const currentTime = Date.now();
+	if (document.hidden || currentTime - _lastMessageTime > TIME_FROM_PREVIOUS_MESSAGE_TO_NOTIFICATE)
 	{
 		document.title = '***' + TITLE + '***';
 		_titleChanged = true;
 		if (onmessageAudio) onmessageAudio.play();
 	}
+	_lastMessageTime = currentTime;
 }
 
 function showMessageWithDateAndUserName(msg)
