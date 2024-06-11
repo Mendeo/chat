@@ -250,6 +250,7 @@ function createFileLink(fileName, href)
 	const link = document.createElement('a');
 	link.innerText = fileName;
 	link.href = href;
+	link.target = '_blank';
 	//link.download = fileName;
 	if (fileName.length > 20) link.title = fileName;
 	li.append(link);
