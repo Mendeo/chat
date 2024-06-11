@@ -108,7 +108,9 @@ socket.addEventListener('message', (e)=>
 			const fileName = e.data.slice(fileStart + 5, linkStart);
 			chatArea.value += `${e.data.slice(0, fileStart)}Отправлен файл "${fileName}".\n`;
 			const href = e.data.slice(linkStart + 1);
-			createFileLink(fileName, href);
+			const mimeStart = e.data.indexOf(';', linkStart + 6);
+			const mimeType = e.data.slice(linkStart + 6, mimeStart);
+			createFileLink(fileName, href, mimeType);
 		}
 		else
 		{
@@ -244,14 +246,14 @@ function setDeliveredStatus(status)
 	}
 }
 
-function createFileLink(fileName, href)
+function createFileLink(fileName, href, mimeType)
 {
 	const li = document.createElement('li');
 	const link = document.createElement('a');
 	link.innerText = fileName;
 	link.href = href;
 	link.target = '_blank';
-	//link.download = fileName;
+	if (mimeType === 'application/octet-stream') link.download = fileName;
 	if (fileName.length > 20) link.title = fileName;
 	li.append(link);
 	filesList.append(li);
