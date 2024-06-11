@@ -207,6 +207,7 @@ function showMessageWithDateAndUserName(msg)
 {
 	const date = new Date().toLocaleString('ru-RU', { hour: 'numeric', minute: 'numeric', second: 'numeric' });
 	chatArea.value += `${date} ${USER_NAME}: ${msg}\n`;
+	chatArea.scrollTo(0, chatArea.scrollHeight);
 }
 
 function setDeliveredStatus(status)
