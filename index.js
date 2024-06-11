@@ -10,6 +10,7 @@ const onmessageAudio = document.getElementById('onmessage-audio');
 const statusElement = document.querySelector('.status');
 const filesList = document.querySelector('#files-list > ul');
 const MAX_PAYLOAD = 100 * 1024 * 1024;
+const MIN_MESSAGE_LENGTH_TO_CONFIRM = 100;
 const TITLE = 'Mendeo chat';
 let _titleChanged = false;
 const STATUS_NO_CONNECTED = 0;
@@ -46,7 +47,7 @@ socket.addEventListener('open', ()=>
 				if (msgInput.value[0] !== ':')
 				{
 					showMessageWithDateAndUserName(msgInput.value);
-					setDeliveredStatus(STATUS_IN_PROGRESS);
+					if (msgSize - USER_SESSION_ID.length >= MIN_MESSAGE_LENGTH_TO_CONFIRM) setDeliveredStatus(STATUS_IN_PROGRESS);
 					queueSet(msgInput.value);
 				}
 				msgInput.value = '';
@@ -70,7 +71,7 @@ socket.addEventListener('open', ()=>
 				const msgSize = new TextEncoder().encode(msg).length;
 				if (msgSize <= MAX_PAYLOAD)
 				{
-					setDeliveredStatus(STATUS_IN_PROGRESS);
+					if (msgSize - USER_SESSION_ID.length >= MIN_MESSAGE_LENGTH_TO_CONFIRM) setDeliveredStatus(STATUS_IN_PROGRESS);
 					socket.send(`${USER_SESSION_ID}:sending-file:${f.name}`);
 					socket.send(msg);
 					createFileLink(f.name, r.result);
