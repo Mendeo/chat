@@ -18,7 +18,9 @@ const STATUS_IN_PROGRESS = 1;
 const STATUS_DELIVERED_TO_SERVER = 2;
 const STATUS_DELIVERED_TO_ALL = 3;
 
-const INPUT_HISTORY_LENGTH = 10;
+const INPUT_HISTORY_LENGTH = 30;
+let _current_input_history_size = 0;
+let _histCount = -1; //Счётчик нажатия кнопки вверх или вниз.
 
 window.addEventListener('focus', ()=>
 {
@@ -37,7 +39,7 @@ socket.addEventListener('open', ()=>
 	setDeliveredStatus(STATUS_DELIVERED_TO_ALL);
 	submit.addEventListener('click', ()=>
 	{
-		_histCount = 0; //Сбрасываем листатель истории, чтобы по стрелочке вверх ввелась предыдущая команда.
+		_histCount = -1; //Сбрасываем листатель истории, чтобы по стрелочке вверх ввелась предыдущая команда.
 		if (msgInput.checkValidity())
 		{
 			const msg = USER_SESSION_ID + msgInput.value;
@@ -134,11 +136,10 @@ socket.addEventListener('close', (e)=>
 	setDeliveredStatus(STATUS_NO_CONNECTED);
 	notificate();
 });
-let _histCount = 0; //Счётчик нажатия кнопки вверх или вниз.
 msgInput.addEventListener('input', ()=>
 {
 	msgInput.reportValidity();
-	_histCount = 0;
+	_histCount = -1;
 });
 msgInput.addEventListener('keydown', (e) =>
 {
@@ -152,10 +153,11 @@ msgInput.addEventListener('keydown', (e) =>
 	if (e.code === 'ArrowUp')
 	{
 		e.preventDefault();
-		if (_histCount < INPUT_HISTORY_LENGTH)
+		if (_histCount < _current_input_history_size - 1)
 		{
-			const hist = queueGet(_histCount);
 			_histCount++;
+			const hist = queueGet(_histCount);
+			console.log(hist, _histCount, _current_input_history_size);
 			if (hist) msgInput.value = hist;
 		}
 	}
@@ -166,6 +168,7 @@ msgInput.addEventListener('keydown', (e) =>
 		{
 			_histCount--;
 			const hist = queueGet(_histCount);
+			console.log(hist, _histCount, _current_input_history_size);
 			if (hist) msgInput.value = hist;
 		}
 	}
@@ -263,6 +266,7 @@ function queueSet(data)
 	_queue[_queueShift] = data;
 	_queueShift++;
 	if (_queueShift === _queue.length) _queueShift = 0;
+	if (_current_input_history_size < INPUT_HISTORY_LENGTH) _current_input_history_size++;
 }
 
 function queueHas(data)
