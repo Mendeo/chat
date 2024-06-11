@@ -7,7 +7,6 @@ import { fileURLToPath } from 'url';
 import * as crypto from 'node:crypto';
 
 const UID_LENGTH = 64;
-const MIN_MESSAGE_LENGTH_TO_CONFIRM = 100;
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -119,13 +118,13 @@ watchDog();
 function sendMessageWithDateAndUserName(username, msg, webSocket_doNotSend)
 {
 	const date = new Date().toLocaleString('ru-RU', { hour: 'numeric', minute: 'numeric', second: 'numeric' });
-	send(`${date} ${username}: ${msg}`, webSocket_doNotSend, msg.length);
+	send(`${date} ${username}: ${msg}`, webSocket_doNotSend);
 }
 
-function send(data, senderWebSocket, rawMsgLength)
+function send(data, senderWebSocket)
 {
 	let senderSessionId = senderWebSocket ? clients.get(senderWebSocket) : null;
-	if (senderWebSocket && rawMsgLength >= MIN_MESSAGE_LENGTH_TO_CONFIRM) senderWebSocket.send(senderSessionId + ':onserver');
+	if (senderWebSocket) senderWebSocket.send(senderSessionId + ':onserver');
 	let deliveredCount = clients.size - 1;
 	for (let c of clients)
 	{
@@ -137,7 +136,7 @@ function send(data, senderWebSocket, rawMsgLength)
 			ws.send(data, () =>
 			{
 				ws.inProgress = false;
-				if (senderWebSocket && rawMsgLength >= MIN_MESSAGE_LENGTH_TO_CONFIRM)
+				if (senderWebSocket)
 				{
 					deliveredCount--;
 					if (deliveredCount === 0) senderWebSocket.send(senderSessionId + ':onall');
