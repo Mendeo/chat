@@ -88,6 +88,10 @@ wss.on('connection', (ws) =>
 				const fileName = data.slice(14);
 				sendMessageWithDateAndUserName(username, `Отправляет файл "${fileName}" и поэтому не сможет пока отвечать.`);
 			}
+			else if (data === ':typing')
+			{
+				send(`:typing${username}`, ws);
+			}
 			else
 			{
 				sendMessageWithDateAndUserName(username, data, ws);
@@ -124,7 +128,7 @@ function sendMessageWithDateAndUserName(username, msg, webSocket_doNotSend)
 function send(data, senderWebSocket)
 {
 	let senderSessionId = senderWebSocket ? clients.get(senderWebSocket) : null;
-	if (senderWebSocket) senderWebSocket.send(senderSessionId + ':onserver');
+	if (senderWebSocket) senderWebSocket.send(':onserver');
 	let deliveredCount = clients.size - 1;
 	for (let c of clients)
 	{
@@ -139,13 +143,13 @@ function send(data, senderWebSocket)
 				if (senderWebSocket)
 				{
 					deliveredCount--;
-					if (deliveredCount === 0) senderWebSocket.send(senderSessionId + ':onall');
+					if (deliveredCount === 0) senderWebSocket.send(':onall');
 				}
 			});
 		}
 		else if (deliveredCount === 0)
 		{
-			senderWebSocket.send(senderSessionId + ':onall');
+			senderWebSocket.send(':onall');
 		}
 	}
 }

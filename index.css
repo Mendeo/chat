@@ -73,6 +73,10 @@
 {
 	background-color: red;
 }
+#typing-status
+{
+	color: green;
+}
 
 @media screen and (max-width: 900px)
 {

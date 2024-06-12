@@ -9,6 +9,10 @@ const USER_NAME = dataElement.getAttribute('data-user-name');
 const onmessageAudio = document.getElementById('onmessage-audio');
 const statusElement = document.querySelector('.status');
 const filesList = document.querySelector('#files-list > ul');
+const typingCheckbox = document.getElementById('send-typing');
+const typingStatus = document.getElementById('typing-status');
+const typingUsers = document.querySelector('#typing-status > span');
+
 const MAX_PAYLOAD = 100 * 1024 * 1024;
 const TITLE = 'Mendeo chat';
 let _titleChanged = false;
@@ -17,12 +21,21 @@ const STATUS_IN_PROGRESS = 1;
 const STATUS_DELIVERED_TO_SERVER = 2;
 const STATUS_DELIVERED_TO_ALL = 3;
 
+const TYPING_SEND_INTERVAL = 1000;
+let _typingTimeoutId = null;
 const INPUT_HISTORY_LENGTH = 30;
 const TIME_FROM_PREVIOUS_MESSAGE_TO_NOTIFICATE = 30000;
 
 let _current_input_history_size = 0;
 let _histCount = -1; //Счётчик нажатия кнопки вверх или вниз.
 let _lastMessageTime = Date.now();
+let _lastTypingSend = Date.now();
+
+const STORAGE_KEY_SEND_TYPING = 'send_typing';
+if (sessionStorage.getItem(STORAGE_KEY_SEND_TYPING) === 'false')
+{
+	typingCheckbox.checked = false;
+}
 
 window.addEventListener('focus', onUserActive);
 window.addEventListener('click', onUserActive);
@@ -92,17 +105,57 @@ socket.addEventListener('open', ()=>
 		}
 		inputFiles.value = '';
 	});
+	msgInput.addEventListener('input', ()=>
+	{
+		if (msgInput.reportValidity() && typingCheckbox.checked)
+		{
+			const currentTime = Date.now();
+			if (currentTime - _lastTypingSend > TYPING_SEND_INTERVAL)
+			{
+				setDeliveredStatus(STATUS_IN_PROGRESS);
+				socket.send(`${USER_SESSION_ID}:typing`);
+				_lastTypingSend = currentTime;
+			}
+		};
+		_histCount = -1;
+	});
 });
 
 socket.addEventListener('message', (e)=>
 {
-	if (e.data === `${USER_SESSION_ID}:onserver`)
+	if (e.data === ':onserver')
 	{
 		setDeliveredStatus(STATUS_DELIVERED_TO_SERVER);
 	}
-	else if (e.data === `${USER_SESSION_ID}:onall`)
+	else if (e.data === ':onall')
 	{
 		setDeliveredStatus(STATUS_DELIVERED_TO_ALL);
+	}
+	else if (e.data.startsWith(':typing'))
+	{
+		if (_typingTimeoutId)
+		{
+			clearTimeout(_typingTimeoutId);
+			_typingTimeoutId = null;
+		}
+		const username = e.data.slice(7);
+		let users = '';
+		if (typingStatus.hidden)
+		{
+			typingStatus.hidden = false;
+			users = username;
+		}
+		else
+		{
+			users = `${typingUsers.innerText}, ${username}`;
+		}
+		typingUsers.innerText = users;
+		_typingTimeoutId = setTimeout(() =>
+		{
+			typingStatus.hidden = true;
+			typingUsers.innerText = '';
+			_typingTimeoutId = null;
+		}, TYPING_SEND_INTERVAL);
 	}
 	else
 	{
@@ -143,11 +196,6 @@ socket.addEventListener('close', (e)=>
 	setDeliveredStatus(STATUS_NO_CONNECTED);
 	notificate();
 });
-msgInput.addEventListener('input', ()=>
-{
-	msgInput.reportValidity();
-	_histCount = -1;
-});
 msgInput.addEventListener('keydown', (e) =>
 {
 	if (e.code === 'Enter' || e.code === 'NumpadEnter')
@@ -179,6 +227,10 @@ msgInput.addEventListener('keydown', (e) =>
 			if (hist) msgInput.value = hist;
 		}
 	}
+});
+typingCheckbox.addEventListener('change', () =>
+{
+	sessionStorage.setItem(STORAGE_KEY_SEND_TYPING, typingCheckbox.checked);
 });
 
 const commandsButtons = document.querySelectorAll('#commands > button');
