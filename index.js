@@ -21,7 +21,7 @@ const STATUS_IN_PROGRESS = 1;
 const STATUS_DELIVERED_TO_SERVER = 2;
 const STATUS_DELIVERED_TO_ALL = 3;
 
-const TYPING_SEND_INTERVAL = 1000;
+const TYPING_SEND_INTERVAL = 1500;
 let _typingTimeoutId = null;
 const INPUT_HISTORY_LENGTH = 30;
 const TIME_FROM_PREVIOUS_MESSAGE_TO_NOTIFICATE = 30000;
@@ -49,7 +49,7 @@ function onUserActive()
 	}
 }
 
-chatArea.value = '';
+chatArea.innerText = '';
 const socket = new WebSocket(`ws://${location.host}`);
 socket.addEventListener('open', ()=>
 {
@@ -165,7 +165,7 @@ socket.addEventListener('message', (e)=>
 		if (linkStart !== -1)
 		{
 			const fileName = e.data.slice(fileStart + 5, linkStart);
-			chatArea.value += `${e.data.slice(0, fileStart)}Отправлен файл "${fileName}".\n`;
+			chatArea.innerText += `${e.data.slice(0, fileStart)}Отправлен файл "${fileName}".\n`;
 			const href = e.data.slice(linkStart + 1);
 			const mimeStart = e.data.indexOf(';', linkStart + 6);
 			const mimeType = e.data.slice(linkStart + 6, mimeStart);
@@ -173,7 +173,7 @@ socket.addEventListener('message', (e)=>
 		}
 		else
 		{
-			chatArea.value += e.data + '\n';
+			chatArea.innerText += e.data + '\n';
 		}
 		chatArea.scrollTo(0, chatArea.scrollHeight);
 		notificate();
@@ -181,17 +181,17 @@ socket.addEventListener('message', (e)=>
 });
 socket.addEventListener('error', (e)=>
 {
-	chatArea.value += 'Ошибка отправки сообщения! ' + e;
+	chatArea.innerText += 'Ошибка отправки сообщения! ' + e;
 });
 socket.addEventListener('close', (e)=>
 {
 	if (e.wasClean)
 	{
-		chatArea.value += `Соединение закрыто чисто, код=${e.code} причина=${e.reason}`;
+		chatArea.innerText += `Соединение закрыто чисто, код=${e.code} причина=${e.reason}`;
 	}
 	else
 	{
-		chatArea.value += 'Соединение прервано';
+		chatArea.innerText += 'Соединение прервано';
 	}
 	setDeliveredStatus(STATUS_NO_CONNECTED);
 	notificate();
@@ -270,7 +270,7 @@ function notificate()
 function showMessageWithDateAndUserName(msg)
 {
 	const date = new Date().toLocaleString('ru-RU', { hour: 'numeric', minute: 'numeric', second: 'numeric' });
-	chatArea.value += `${date} ${USER_NAME}: ${msg}\n`;
+	chatArea.innerText += `${date} ${USER_NAME}: ${msg}\n`;
 	chatArea.scrollTo(0, chatArea.scrollHeight);
 }
 
