@@ -20,11 +20,11 @@
 		<div id="chat-area" spellcheck="false"></div><br>
 	</div>
 	<br>
-	<div class="input_area">
+	<form class="input_area" id="submit">
 		<div class="status status__no_connected" title="Статус доставки"></div>
 		<input type="text" id="input-text" name="msg" autocomplete="off" required>
-		<button id="submit" type="submit">Отправить</button>
-	</div>
+		<input type="submit" value="Отправить" disabled>
+	</form>
 	<span id="typing-status" hidden>Печатают: <span></span></span>
 	<span id="max-payload-size-exceeded-error" class="error invisible">Превышен максимальный размер сообщения! (104 857 536 байт)</span>
 	<br>

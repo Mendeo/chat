@@ -12,11 +12,11 @@
 	display: flex;
 	justify-content: space-between;
 }
-.input_area > input
+.input_area > input[type="text"]
 {
 	width: 100%;
 }
-.input_area > button
+.input_area > input[type="submit"]
 {
 	margin-left: 1rem;
 }

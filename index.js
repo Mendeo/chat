@@ -1,7 +1,8 @@
 'use strict';
 const chatArea = document.getElementById('chat-area');
 const msgInput = document.getElementById('input-text');
-const submit = document.getElementById('submit');
+const submitFrom = document.getElementById('submit');
+const submitButton = document.querySelector('#submit input[type="submit"]');
 const errorElement = document.getElementById('max-payload-size-exceeded-error');
 const dataElement = document.querySelector('[data-user-session-id]');
 const USER_SESSION_ID = dataElement.getAttribute('data-user-session-id');
@@ -49,14 +50,16 @@ function onUserActive()
 	}
 }
 
+submitButton.disabled = false;
 chatArea.innerText = '';
 const socket = new WebSocket(`ws://${location.host}`);
 socket.addEventListener('open', ()=>
 {
 	socket.send(USER_SESSION_ID + '+');
 	setDeliveredStatus(STATUS_DELIVERED_TO_ALL);
-	submit.addEventListener('click', ()=>
+	submitFrom.addEventListener('submit', (e)=>
 	{
+		e.preventDefault();
 		_histCount = -1; //Сбрасываем листатель истории, чтобы по стрелочке вверх ввелась предыдущая команда.
 		if (msgInput.checkValidity())
 		{
@@ -197,13 +200,6 @@ socket.addEventListener('close', (e)=>
 	}
 	setDeliveredStatus(STATUS_NO_CONNECTED);
 	notificate();
-});
-msgInput.addEventListener('keydown', (e) =>
-{
-	if (e.code === 'Enter' || e.code === 'NumpadEnter')
-	{
-		submit.click();
-	}
 });
 msgInput.addEventListener('keydown', (e) =>
 {
