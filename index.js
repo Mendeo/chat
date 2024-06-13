@@ -183,17 +183,17 @@ socket.addEventListener('message', (e)=>
 });
 socket.addEventListener('error', (e)=>
 {
-	chatArea.innerText += 'Ошибка отправки сообщения! ' + e;
+	chatArea.innerHTML += `<b>Ошибка отправки сообщения! ${e}</b><br>`;
 });
 socket.addEventListener('close', (e)=>
 {
 	if (e.wasClean)
 	{
-		chatArea.innerText += `Соединение закрыто чисто, код=${e.code} причина=${e.reason}`;
+		chatArea.innerHTML += `<b>Соединение закрыто. Код: ${e.code}, причина: ${e.reason}</b><br>`;
 	}
 	else
 	{
-		chatArea.innerText += 'Соединение прервано';
+		chatArea.innerHTML += '<b>Соединение прервано</b><br>';
 	}
 	setDeliveredStatus(STATUS_NO_CONNECTED);
 	notificate();
