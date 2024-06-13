@@ -60,6 +60,7 @@
 	height: 0.7rem;
 	border-radius: 50%;
 	margin-right: 0.5rem;
+	aspect-ratio: 1 / 1;
 }
 .status__in_progress
 {
