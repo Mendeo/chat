@@ -167,7 +167,7 @@ socket.addEventListener('message', (e)=>
 		if (linkStart !== -1)
 		{
 			const fileName = e.data.slice(fileStart + 5, linkStart);
-			chatArea.innerText += `${e.data.slice(0, fileStart)}Отправлен файл "${fileName}".\n`;
+			chatArea.innerHTML += `${e.data.slice(0, fileStart)}Отправлен файл "${fileName}".<br>`;
 			const href = e.data.slice(linkStart + 1);
 			const mimeStart = e.data.indexOf(';', linkStart + 6);
 			const mimeType = e.data.slice(linkStart + 6, mimeStart);
@@ -175,7 +175,7 @@ socket.addEventListener('message', (e)=>
 		}
 		else
 		{
-			chatArea.innerText += e.data + '\n';
+			chatArea.innerHTML += e.data + '<br>';
 		}
 		chatArea.scrollTo(0, chatArea.scrollHeight);
 		notificate();
@@ -272,7 +272,7 @@ function notificate()
 function showMessageWithDateAndUserName(msg)
 {
 	const date = new Date().toLocaleString('ru-RU', { hour: 'numeric', minute: 'numeric', second: 'numeric' });
-	chatArea.innerText += `${date} ${USER_NAME}: ${msg}\n`;
+	chatArea.innerHTML += `${date} <b>${USER_NAME}</b>: ${msg}<br>`;
 	chatArea.scrollTo(0, chatArea.scrollHeight);
 }
 

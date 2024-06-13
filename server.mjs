@@ -81,7 +81,7 @@ wss.on('connection', (ws) =>
 				{
 					list.push(_users_session_ids.get(userSessionId));
 				}
-				sendMessageWithDateAndUserName(username, `:list: ${list.join(', ')}`);
+				sendMessageWithDateAndUserName('<b>Server</b>', `${username} запросил list: ${list.join(', ')}`);
 			}
 			else if (data.startsWith(':sending-file:'))
 			{
@@ -112,7 +112,7 @@ wss.on('connection', (ws) =>
 			clients.delete(ws);
 			_users_online.delete(USER_SESSION_ID);
 			_users_session_ids.delete(USER_SESSION_ID);
-			sendMessageWithDateAndUserName('Server', `Пользователь ${username} вышел из чата.`);
+			sendMessageWithDateAndUserName('<b>Server</b>', `Пользователь ${username} вышел из чата.`);
 			console.log(`${new Date().toLocaleString('ru-RU')}: Socket closed: user ${username} has left the chat. Code: ${code}, reason: ${reason}`);
 		}
 	});
@@ -167,7 +167,7 @@ function watchDog()
 				const username = _users_session_ids.get(userSessionId);
 				if (ws.inProgress) //|| ws._receiver._payloadLength
 				{
-					sendMessageWithDateAndUserName('Server', `Пользователь ${username} ещё не получил все данные, ожидаем...`);
+					sendMessageWithDateAndUserName('<b>Server</b>', `Пользователь ${username} ещё не получил все данные, ожидаем...`);
 				}
 				else
 				{
@@ -175,7 +175,7 @@ function watchDog()
 					_users_online.delete(userSessionId);
 					_users_session_ids.delete(userSessionId);
 					ws.terminate();
-					sendMessageWithDateAndUserName('Server', `Пользователь ${username} был отключён по таймауту.`);
+					sendMessageWithDateAndUserName('<b>Server</b>', `Пользователь ${username} был отключён по таймауту.`);
 					console.log(`${new Date().toLocaleString('ru-RU', { hour: 'numeric', minute: 'numeric', second: 'numeric' })}: User ${username} was  terminated by timeout.`);
 				}
 			}
