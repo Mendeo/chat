@@ -5,6 +5,7 @@
 	border: 0.1rem solid black;
 	font-family: Arial, Helvetica, sans-serif;
 	font-size: small;
+	overflow-y: auto;
 }
 .input_area
 {
