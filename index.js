@@ -70,6 +70,7 @@ socket.addEventListener('open', ()=>
 					showMessageWithDateAndUserName(msgInput.value);
 					setDeliveredStatus(STATUS_IN_PROGRESS);
 					queueSet(msgInput.value);
+					_lastMessageTime = Date.now();
 				}
 				msgInput.value = '';
 			}
@@ -96,6 +97,7 @@ socket.addEventListener('open', ()=>
 					socket.send(`${USER_SESSION_ID}:sending-file:${f.name}`);
 					socket.send(msg);
 					createFileLink(f.name, r.result);
+					_lastMessageTime = Date.now();
 				}
 				else
 				{
