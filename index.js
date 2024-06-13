@@ -1,7 +1,7 @@
 'use strict';
 const chatArea = document.getElementById('chat-area');
 const msgInput = document.getElementById('input-text');
-const submitFrom = document.getElementById('submit');
+const submitForm = document.getElementById('submit');
 const submitButton = document.querySelector('#submit input[type="submit"]');
 const errorElement = document.getElementById('max-payload-size-exceeded-error');
 const dataElement = document.querySelector('[data-user-session-id]');
@@ -57,7 +57,7 @@ socket.addEventListener('open', ()=>
 {
 	socket.send(USER_SESSION_ID + '+');
 	setDeliveredStatus(STATUS_DELIVERED_TO_ALL);
-	submitFrom.addEventListener('submit', (e)=>
+	submitForm.addEventListener('submit', (e)=>
 	{
 		e.preventDefault();
 		_histCount = -1; //Сбрасываем листатель истории, чтобы по стрелочке вверх ввелась предыдущая команда.
@@ -240,7 +240,7 @@ for (let i = 0; i < commands.length; i++)
 	b.addEventListener('click', () =>
 	{
 		msgInput.value = c;
-		submit.click();
+		submitButton.click();
 	});
 }
 
@@ -280,6 +280,7 @@ function setDeliveredStatus(status)
 		statusElement.classList.remove('status__delivered_to_all');
 		statusElement.classList.remove('status__no_connected');
 		statusElement.classList.add('status__in_progress');
+		statusElement.title = 'Доставляется на сервер';
 	}
 	else if (status === STATUS_DELIVERED_TO_SERVER)
 	{
@@ -287,6 +288,7 @@ function setDeliveredStatus(status)
 		statusElement.classList.remove('status__delivered_to_all');
 		statusElement.classList.remove('status__no_connected');
 		statusElement.classList.add('status__delivered_to_server');
+		statusElement.title = 'Доставляется пользователям';
 	}
 	else if (status === STATUS_DELIVERED_TO_ALL)
 	{
@@ -294,6 +296,7 @@ function setDeliveredStatus(status)
 		statusElement.classList.remove('status__in_progress');
 		statusElement.classList.remove('status__no_connected');
 		statusElement.classList.add('status__delivered_to_all');
+		statusElement.title = 'Всё доставлено';
 	}
 	else if (status === STATUS_NO_CONNECTED)
 	{
@@ -301,6 +304,7 @@ function setDeliveredStatus(status)
 		statusElement.classList.remove('status__delivered_to_all');
 		statusElement.classList.remove('status__in_progress');
 		statusElement.classList.add('status__no_connected');
+		statusElement.title = 'Нет подключения';
 	}
 }
 
