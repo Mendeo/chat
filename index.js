@@ -180,7 +180,7 @@ socket.addEventListener('message', (e)=>
 			chatArea.innerHTML += e.data + '<br>';
 		}
 		chatArea.scrollTo(0, chatArea.scrollHeight);
-		notificate();
+		notificate(isMentioned(e.data));
 	}
 });
 socket.addEventListener('error', (e)=>
@@ -243,6 +243,17 @@ for (let i = 0; i < commands.length; i++)
 	});
 }
 
+function isMentioned(text)
+{
+	let result = false;
+	const usernameIndex = text.indexOf(`@${USER_NAME}`);
+	if (usernameIndex !== -1)
+	{
+		const indexAfterUserName = usernameIndex + USER_NAME.length + 1;
+		if (text.length === indexAfterUserName || text[indexAfterUserName] === ' ') result = true;
+	}
+	return result;
+}
 function showError(errorElement, timeout)
 {
 	errorElement.classList.remove('invisible');
@@ -252,10 +263,10 @@ function showError(errorElement, timeout)
 	}, timeout);
 }
 
-function notificate()
+function notificate(force)
 {
 	const currentTime = Date.now();
-	if (document.hidden || currentTime - _lastMessageTime > TIME_FROM_PREVIOUS_MESSAGE_TO_NOTIFICATE)
+	if (force || document.hidden || currentTime - _lastMessageTime > TIME_FROM_PREVIOUS_MESSAGE_TO_NOTIFICATE)
 	{
 		document.title = '***' + TITLE + '***';
 		_titleChanged = true;
