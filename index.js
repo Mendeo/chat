@@ -117,7 +117,6 @@ socket.addEventListener('open', ()=>
 			const currentTime = Date.now();
 			if (currentTime - _lastTypingSend > TYPING_SEND_INTERVAL)
 			{
-				setDeliveredStatus(STATUS_IN_PROGRESS);
 				socket.send(`${USER_SESSION_ID}:typing`);
 				_lastTypingSend = currentTime;
 			}

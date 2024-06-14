@@ -90,7 +90,7 @@ wss.on('connection', (ws) =>
 			}
 			else if (data === ':typing')
 			{
-				send(`:typing${username}`, ws);
+				send(`:typing${username}`, ws, false);
 			}
 			else
 			{
@@ -122,13 +122,13 @@ watchDog();
 function sendMessageWithDateAndUserName(username, msg, webSocket_doNotSend)
 {
 	const date = new Date().toLocaleString('ru-RU', { hour: 'numeric', minute: 'numeric', second: 'numeric' });
-	send(`${date} ${username}: ${msg}`, webSocket_doNotSend);
+	send(`${date} ${username}: ${msg}`, webSocket_doNotSend, true);
 }
 
-function send(data, senderWebSocket)
+function send(data, senderWebSocket, sendDeliveryStatus)
 {
 	let senderSessionId = senderWebSocket ? clients.get(senderWebSocket) : null;
-	if (senderWebSocket) senderWebSocket.send(':onserver');
+	if (senderWebSocket && sendDeliveryStatus) senderWebSocket.send(':onserver');
 	let deliveredCount = clients.size - 1;
 	for (let c of clients)
 	{
@@ -140,14 +140,14 @@ function send(data, senderWebSocket)
 			ws.send(data, () =>
 			{
 				ws.inProgress = false;
-				if (senderWebSocket)
+				if (senderWebSocket && sendDeliveryStatus)
 				{
 					deliveredCount--;
 					if (deliveredCount === 0) senderWebSocket.send(':onall');
 				}
 			});
 		}
-		else if (deliveredCount === 0)
+		else if (deliveredCount === 0 && sendDeliveryStatus)
 		{
 			senderWebSocket.send(':onall');
 		}
