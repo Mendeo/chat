@@ -202,7 +202,7 @@ socket.addEventListener('close', (e)=>
 });
 msgInput.addEventListener('keydown', (e) =>
 {
-	if (e.code === 'ArrowUp')
+	if (e.key === 'ArrowUp')
 	{
 		e.preventDefault();
 		if (_histCount < _current_input_history_size - 1)
@@ -213,7 +213,7 @@ msgInput.addEventListener('keydown', (e) =>
 			if (hist) msgInput.value = hist;
 		}
 	}
-	else if (e.code === 'ArrowDown')
+	else if (e.key === 'ArrowDown')
 	{
 		e.preventDefault();
 		if (_histCount > 0)
