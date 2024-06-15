@@ -94,4 +94,8 @@
 		width: 100%;
 		max-height: none;
 	}
+	#chat-area
+	{
+		height: 45vh;
+	}
 }
