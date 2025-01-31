@@ -1,0 +1,38 @@
+body
+{
+	font-family: Arial, Helvetica, sans-serif;
+}
+.center
+{
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	height: 95vh;
+	flex-direction: column;
+}
+.form_view
+{
+	display: flex;
+	align-items: start;
+	flex-direction: column;
+	justify-content: space-between;
+	height: 5rem;
+}
+.form_view div
+{
+	display: flex;
+	align-items: center;
+}
+.form_view label
+{
+	display: block;
+	width: 4rem;
+}
+.form_view button
+{
+	width: 100%;
+}
+.error
+{
+	color: red;
+}

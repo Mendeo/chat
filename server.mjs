@@ -4,9 +4,11 @@ import { WebSocketServer } from 'ws';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import { fileURLToPath } from 'url';
-import * as crypto from 'node:crypto';
+import { randomBytes } from 'node:crypto';
+import * as login from './login.mjs';
 
 const UID_LENGTH = 64;
+const REFRESH_HTTP_SESSION_TIMEOUT = 3;
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -22,6 +24,7 @@ files.set('/robots.txt', { data: fs.readFileSync(path.join(__dirname, 'robots.tx
 files.set('/404.html', { data: fs.readFileSync(path.join(__dirname, '404.html')), contentType: 'text/html; charset=utf-8' });
 files.set('/404.css', { data: fs.readFileSync(path.join(__dirname, '404.css')), contentType: 'text/css; charset=utf-8' });
 let _hasOnMessage;
+
 try
 {
 	fs.accessSync(path.join(__dirname, 'onmessage.mp3'));
@@ -31,6 +34,7 @@ catch
 {
 	_hasOnMessage = false;
 }
+
 if (_hasOnMessage)
 {
 	files.set('/onmessage.mp3', { data: fs.readFileSync(path.join(__dirname, 'onmessage.mp3')), contentType: 'audio/mpeg' });
@@ -39,7 +43,7 @@ if (_hasOnMessage)
 let _lastReqTime = new Date(0);
 let _lastIP = '';
 
-const USERS = JSON.parse(fs.readFileSync(path.join(__dirname, 'users.json')).toString());
+//const USERS = JSON.parse(fs.readFileSync(path.join(__dirname, 'users.json')).toString());
 
 const server = createServer(app);
 const MAX_PAYLOAD = 100 * 1024 * 1024;
@@ -196,64 +200,79 @@ function app(req, res)
 	_lastReqTime = now;
 	_lastIP = ip;
 	const url = req.url.split('?');
-	const urlPath = url[0];
+	let urlPath = decodeURIComponent(url[0]);
+	if (urlPath === '/') urlPath = '/index.html';
 	console.log('url: ' + urlPath);
-	if (req.headers.authorization)
+	
+	//HTML логин
+	login.setFavicon(files.get('/favicon.ico').data);
+	const userdata = login.perform(req, res, urlPath);
+	if (userdata)
 	{
-		const data = req.headers.authorization.split(' ');
-		if (data[0] !== 'Basic')
+		let cookie = null;
+		if (now - userdata.timeStamp > REFRESH_HTTP_SESSION_TIMEOUT * 1000)
 		{
-			authForm();
+			cookie = userdata.cookieForUpdateSessionTimeout();
 		}
-		else
-		{
-			const cred = Buffer.from(data[1], 'base64').toString().split(':');
-			const username = cred[0];
-			const password = cred[1];
-			if (USERS[username])
-			{
-				const passwordInMd5 = Buffer.from(md5(Buffer.from(password))).toString('hex');
-				if (USERS[username] === passwordInMd5)
-				{
-					normalWork(res, urlPath, username);
-				}
-				else
-				{
-					authForm();
-				}
-			}
-			else
-			{
-				authForm();
-			}
-		}
-	}
-	else if (urlPath === '/robots.txt')
-	{
-		const file = files.get(urlPath);
-		sendData(res, file.data, file.contentType, 200, 'max-age: 31536000, immutable');
-	}
-	else
-	{
-		authForm();
+		normalWork(res, urlPath, userdata.username, cookie);
 	}
 
-	function authForm()
-	{
-		console.log('Authentication form');
-		const msg = 'Authentication required.';
-		res.writeHead(401,
-			{
-				'WWW-Authenticate': 'Basic realm="Please input correct username and password before viewing this page."',
-				'Content-Length': msg.length,
-				'Content-Type': 'text/plain'
-			});
-		res.end(msg);
-	}
+	//Базовая аутентифакция
+	// if (req.headers.authorization)
+	// {
+	// 	const data = req.headers.authorization.split(' ');
+	// 	if (data[0] !== 'Basic')
+	// 	{
+	// 		authForm();
+	// 	}
+	// 	else
+	// 	{
+	// 		const cred = Buffer.from(data[1], 'base64').toString().split(':');
+	// 		const username = cred[0];
+	// 		const password = cred[1];
+	// 		if (USERS[username])
+	// 		{
+	// 			const passwordInMd5 = Buffer.from(md5(Buffer.from(password))).toString('hex');
+	// 			if (USERS[username] === passwordInMd5)
+	// 			{
+	// 				normalWork(res, urlPath, username);
+	// 			}
+	// 			else
+	// 			{
+	// 				authForm();
+	// 			}
+	// 		}
+	// 		else
+	// 		{
+	// 			authForm();
+	// 		}
+	// 	}
+	// }
+	// else if (urlPath === '/robots.txt')
+	// {
+	// 	const file = files.get(urlPath);
+	// 	sendData(res, file.data, file.contentType, 200, 'max-age: 31536000, immutable');
+	// }
+	// else
+	// {
+	// 	authForm();
+	// }
 
-	function normalWork(res, urlPath, username)
+	// function authForm()
+	// {
+	// 	console.log('Authentication form');
+	// 	const msg = 'Authentication required.';
+	// 	res.writeHead(401,
+	// 		{
+	// 			'WWW-Authenticate': 'Basic realm="Please input correct username and password before viewing this page."',
+	// 			'Content-Length': msg.length,
+	// 			'Content-Type': 'text/plain'
+	// 		});
+	// 	res.end(msg);
+	// }
+
+	function normalWork(res, urlPath, username, cookie)
 	{
-		if (urlPath === '/') urlPath = '/index.html';
 		if (urlPath === '/index.html')
 		{
 			let USER_SESSION_ID = reverseGet(_users_session_ids, username);
@@ -278,7 +297,7 @@ function app(req, res)
 				onmessageAudioTag = '\n\t<audio id="onmessage-audio" src="onmessage.mp3" preload="auto"></audio>';
 			}
 			const data = Buffer.from(file.data[0] + username + file.data[1] + USER_SESSION_ID + file.data[2] + username + file.data[3] + onmessageAudioTag + file.data[4]);
-			sendData(res, data, file.contentType, 200, 'no-store');
+			sendData(res, data, file.contentType, 200, 'no-store', cookie);
 		}
 		else if (files.has(urlPath))
 		{
@@ -304,7 +323,7 @@ function reverseGet(data, value) //Поиск по значению в Map
 function getUID(size)
 {
 	const alpabet = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-	const bytes = new Uint8Array(crypto.randomBytes(size));
+	const bytes = new Uint8Array(randomBytes(size));
 	let UID = '';
 	for (let b of bytes)
 	{
@@ -314,14 +333,22 @@ function getUID(size)
 }
 
 //Поиск и сопоставление нужных путей
-function sendData(res, data, contentType, code, cacheControl)
+function sendData(res, data, contentType, code, cacheControl, cookie)
 {
-	res.writeHead(code,
+	const headers =
+	{
+		'Content-Length': data.length,
+		'Content-Type': contentType,
+		'Cache-Control': cacheControl
+	};
+	if (cookie)
+	{
+		if (cookie?.length)
 		{
-			'Content-Length': data.length,
-			'Content-Type': contentType,
-			'Cache-Control': cacheControl
-		});
+			headers['Set-Cookie'] = cookie;
+		}
+	}
+	res.writeHead(code, headers);
 	res.end(data);
 }
 
