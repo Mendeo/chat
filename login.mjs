@@ -2,7 +2,7 @@
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import { fileURLToPath } from 'url';
-import { randomBytes } from 'node:crypto';
+import { randomBytes, createHash } from 'node:crypto';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -69,8 +69,8 @@ export default function (req, res, urlPath)
 						if (Object.prototype.hasOwnProperty.call(USERS, reqPostData?.username))
 						{
 							const username = reqPostData?.username;
-							const password = USERS[username];
-							if (password === reqPostData?.password)
+							const passwordHash = USERS[username];
+							if (passwordHash === createHash('sha256').update(reqPostData?.password).digest('hex'))
 							{
 								let url = '/index.html';
 								if (cookie?.reflink) url = cookie.reflink;
