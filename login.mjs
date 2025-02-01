@@ -279,7 +279,7 @@ export default function (req, res, urlPath)
 			str.forEach((p) =>
 			{
 				let keyVal = p.split('=');
-				params[keyVal[0]] = keyVal[1];
+				params[decodeURIComponent(keyVal[0])] = decodeURIComponent(keyVal[1]);
 			});
 		}
 		return params;
