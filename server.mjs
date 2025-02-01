@@ -5,7 +5,7 @@ import * as fs from 'node:fs';
 import * as path from 'node:path';
 import { fileURLToPath } from 'url';
 import { randomBytes } from 'node:crypto';
-import * as login from './login.mjs';
+import login from './login.mjs';
 
 const UID_LENGTH = 64;
 const REFRESH_HTTP_SESSION_TIMEOUT = 3;
@@ -19,8 +19,6 @@ const files = new Map();
 files.set('/index.html', { data: fs.readFileSync(path.join(__dirname, 'index.html')).toString().split('~%~'), contentType: 'text/html; charset=utf-8' });
 files.set('/index.js', { data: fs.readFileSync(path.join(__dirname, 'index.js')), contentType: 'text/javascript; charset=utf-8' });
 files.set('/index.css', { data: fs.readFileSync(path.join(__dirname, 'index.css')), contentType: 'text/css; charset=utf-8' });
-files.set('/favicon.ico', { data: fs.readFileSync(path.join(__dirname, 'favicon.ico')), contentType: 'image/x-icon' });
-files.set('/robots.txt', { data: fs.readFileSync(path.join(__dirname, 'robots.txt')), contentType: 'text/plain; charset=utf-8' });
 files.set('/404.html', { data: fs.readFileSync(path.join(__dirname, '404.html')), contentType: 'text/html; charset=utf-8' });
 files.set('/404.css', { data: fs.readFileSync(path.join(__dirname, '404.css')), contentType: 'text/css; charset=utf-8' });
 let _hasOnMessage;
@@ -203,10 +201,9 @@ function app(req, res)
 	let urlPath = decodeURIComponent(url[0]);
 	if (urlPath === '/') urlPath = '/index.html';
 	console.log('url: ' + urlPath);
-	
+
 	//HTML логин
-	login.setFavicon(files.get('/favicon.ico').data);
-	const userdata = login.perform(req, res, urlPath);
+	const userdata = login(req, res, urlPath);
 	if (userdata)
 	{
 		let cookie = null;

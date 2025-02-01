@@ -17,22 +17,20 @@ const loginErrorHtml = '<p class="error">Пользователя с таким 
 cachedFiles.set('/login.html', { data: Buffer.from(fs.readFileSync(path.join(__dirname, 'login.html')).toString().replace('~%~', '')), contentType: 'text/html; charset=utf-8' });
 cachedFiles.set('/login_error.html', { data: Buffer.from(fs.readFileSync(path.join(__dirname, 'login.html')).toString().replace('~%~', loginErrorHtml)), contentType: 'text/html; charset=utf-8' });
 cachedFiles.set('/login.css', { data: fs.readFileSync(path.join(__dirname, 'login.css')), contentType: 'text/css; charset=utf-8' });
+cachedFiles.set('/favicon.ico', { data: fs.readFileSync(path.join(__dirname, 'favicon.ico')), contentType: 'image/x-icon' });
+cachedFiles.set('/robots.txt', { data: fs.readFileSync(path.join(__dirname, 'robots.txt')), contentType: 'text/plain; charset=utf-8' });
 
 loginExceptions.add('/login.css');
+loginExceptions.add('/favicon.ico');
+loginExceptions.add('/robots.txt');
 
-export function setFavicon(favicon)
-{
-	cachedFiles.set('/favicon.ico', { data: favicon, contentType: 'image/x-icon'});
-	loginExceptions.add('/favicon.ico');
-}
-
-export function perform(req, res, urlPath)
+export default function (req, res, urlPath)
 {
 	const sessionId = login(req, res, urlPath);
 	if (sessionId)
 	{
 		const userdata = sessions.get(sessionId);
-		return { username: userdata.username, cookieForUpdateSessionTimeout: () => updateSessionTimeout(sessionId, userdata)};
+		return { username: userdata.username, cookieForUpdateSessionTimeout: () => updateSessionTimeout(sessionId, userdata) };
 	}
 	return null;
 
@@ -68,7 +66,7 @@ export function perform(req, res, urlPath)
 					{
 						const reqPostData = parseRequest(postBody);
 						//console.log(reqPostData);
-						if (USERS.hasOwnProperty(reqPostData?.username))
+						if (Object.prototype.hasOwnProperty.call(USERS, reqPostData?.username))
 						{
 							const username = reqPostData?.username;
 							const password = USERS[username];
@@ -157,7 +155,7 @@ export function perform(req, res, urlPath)
 		}
 	}
 
-	function generateSessionCookie(sessionId, username)
+	function generateSessionCookie(sessionId) //, username)
 	{
 		const sessionCookie = [];
 		sessionCookie.push(`sessionId=${sessionId}; path=/; max-age=${SESSION_TIMEOUT}; samesite=strict; httpOnly`);
@@ -165,7 +163,7 @@ export function perform(req, res, urlPath)
 		return sessionCookie;
 	}
 
-	function deleteSessionCookie(sessionId, username)
+	function deleteSessionCookie(sessionId) //, username)
 	{
 		const sessionCookie = [];
 		sessionCookie.push(`sessionId=${sessionId}; path=/; max-age=0; samesite=strict; httpOnly`);
