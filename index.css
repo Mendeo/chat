@@ -31,6 +31,16 @@
 	justify-content: flex-start;
 	align-items: flex-start;
 }
+.start_end
+{
+	display: flex;
+	justify-content:space-between;
+	align-items: center;
+}
+.start_end a
+{
+	font-weight: bold;
+}
 #files-list
 {
 	min-width: 10rem;
