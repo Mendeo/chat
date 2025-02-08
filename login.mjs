@@ -148,7 +148,7 @@ export default function (req, res, urlPath)
 				}
 				else
 				{
-					reload(res, '/login.html', [`reflink=${urlPath}; path=/; max-age=600; samesite=strict`]);
+					reload(res, '/login.html', [`reflink=${urlPath}; path=/; max-age=${SESSION_TIMEOUT}; samesite=strict`]);
 					return null;
 				}
 			}
