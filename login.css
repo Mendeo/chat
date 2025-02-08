@@ -17,16 +17,19 @@ body
 	flex-direction: column;
 	justify-content: space-between;
 	height: 5rem;
+	width: max-content;
 }
 .form_view div
 {
 	display: flex;
 	align-items: center;
+	justify-content: space-between;
+	width: 100%;
 }
 .form_view label
 {
 	display: block;
-	width: 4rem;
+	padding-right: 0.5rem;
 }
 .form_view button
 {
