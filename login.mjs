@@ -76,7 +76,7 @@ export default function (req, res, urlPath)
 								if (cookie?.reflink) reflink = cookie.reflink;
 								const sessionId = generateSessionId();
 								const sessionCookie = generateSessionCookie(sessionId, username);
-								if (cookie?.reflink) sessionCookie.push('reflink=/; max-age=0; samesite=strict');
+								if (cookie?.reflink) sessionCookie.push('reflink=/; path=/; max-age=0; samesite=strict');
 								const timerId = setTimeout(() =>
 								{
 									sessions.delete(sessionId);
