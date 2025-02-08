@@ -72,8 +72,8 @@ export default function (req, res, urlPath)
 							const passwordHash = USERS[username];
 							if (passwordHash === createHash('sha256').update(reqPostData?.password).digest('hex'))
 							{
-								let url = '/index.html';
-								if (cookie?.reflink) url = cookie.reflink;
+								let reflink = '/index.html';
+								if (cookie?.reflink) reflink = cookie.reflink;
 								const sessionId = generateSessionId();
 								const sessionCookie = generateSessionCookie(sessionId, username);
 								if (cookie?.reflink) sessionCookie.push('reflink=/; max-age=0; samesite=strict');
@@ -82,7 +82,7 @@ export default function (req, res, urlPath)
 									sessions.delete(sessionId);
 								}, SESSION_TIMEOUT * 1000);
 								sessions.set(sessionId, { username, timerId, timeStamp: Date.now() });
-								reload(res, url, sessionCookie);
+								reload(res, reflink, sessionCookie);
 							}
 							else
 							{
@@ -148,7 +148,7 @@ export default function (req, res, urlPath)
 				}
 				else
 				{
-					reload(res, '/login.html', [`reflink=${urlPath}; path=/; max-age=${SESSION_TIMEOUT}; samesite=strict`]);
+					reload(res, '/login.html', [`reflink=${encodeURI(urlPath)}; path=/; max-age=${SESSION_TIMEOUT}; samesite=strict`]);
 					return null;
 				}
 			}
