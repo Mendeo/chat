@@ -81,7 +81,7 @@ export default function (req, res, urlPath)
 								{
 									sessions.delete(sessionId);
 								}, SESSION_TIMEOUT * 1000);
-								sessions.set(sessionId, { username, timerId, timeStamp: Date.now() });
+								sessions.set(sessionId, { username, timerId });
 								reload(res, reflink, sessionCookie);
 							}
 							else
@@ -145,6 +145,11 @@ export default function (req, res, urlPath)
 				if (sessionId)
 				{
 					return sessionId;
+				}
+				else if (urlPath === '/sw.js') //Отбиваем стандартные запросы браузера.
+				{
+					res.writeHead(404);
+					res.end();
 				}
 				else
 				{
