@@ -20,12 +20,12 @@
 			<b><span>Список файлов:</span></b>
 			<ul></ul>
 		</div>
-		<div id="chat-area" spellcheck="false" contenteditable="true"></div><br>
+		<div id="chat-area" spellcheck="false"></div><br>
 	</div>
 	<br>
 	<form class="input_area" id="submit">
 		<div class="status status__no_connected" title="Нет подключения"></div>
-		<input type="text" id="input-text" name="msg" autocomplete="off" required>
+		<textarea id="input-text" name="msg" autocomplete="off" required></textarea>
 		<input type="submit" value="Отправить" disabled>
 	</form>
 	<span id="typing-status" hidden>Печатают: <span></span></span>

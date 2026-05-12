@@ -53,24 +53,25 @@ function onUserActive()
 submitButton.disabled = false;
 chatArea.innerText = '';
 const socket = new WebSocket(`wss://${location.host}`);
-socket.addEventListener('open', ()=>
+socket.addEventListener('open', () =>
 {
 	socket.send(USER_SESSION_ID + '+');
 	setDeliveredStatus(STATUS_DELIVERED_TO_ALL);
-	submitForm.addEventListener('submit', (e)=>
+	submitForm.addEventListener('submit', (e) =>
 	{
 		e.preventDefault();
 		_histCount = -1; //Сбрасываем листатель истории, чтобы по стрелочке вверх ввелась предыдущая команда.
 		if (msgInput.checkValidity())
 		{
-			const msg = USER_SESSION_ID + msgInput.value;
+			const msgHtml = msgInput.value.replace(/\r/g, '').replace(/\n/g, '<br>')
+			const msg = USER_SESSION_ID + msgHtml;
 			const msgSize = new TextEncoder().encode(msg).length;
 			if (msgSize <= MAX_PAYLOAD)
 			{
 				socket.send(msg);
-				if (msgInput.value[0] !== ':')
+				if (msgHtml[0] !== ':')
 				{
-					showMessageWithDateAndUserName(msgInput.value);
+					showMessageWithDateAndUserName(msgHtml);
 					setDeliveredStatus(STATUS_IN_PROGRESS);
 					queueSet(msgInput.value);
 					_lastMessageTime = Date.now();
@@ -110,7 +111,7 @@ socket.addEventListener('open', ()=>
 		}
 		inputFiles.value = '';
 	});
-	msgInput.addEventListener('input', ()=>
+	msgInput.addEventListener('input', () =>
 	{
 		if (msgInput.reportValidity() && typingCheckbox.checked)
 		{
@@ -125,7 +126,7 @@ socket.addEventListener('open', ()=>
 	});
 });
 
-socket.addEventListener('message', (e)=>
+socket.addEventListener('message', (e) =>
 {
 	if (e.data === ':onserver')
 	{
@@ -183,11 +184,11 @@ socket.addEventListener('message', (e)=>
 		notificate(isMentioned(e.data));
 	}
 });
-socket.addEventListener('error', (e)=>
+socket.addEventListener('error', (e) =>
 {
 	chatArea.innerHTML += `<b>Ошибка отправки сообщения! ${e}</b><br>`;
 });
-socket.addEventListener('close', (e)=>
+socket.addEventListener('close', (e) =>
 {
 	if (e.wasClean)
 	{
@@ -223,6 +224,11 @@ msgInput.addEventListener('keydown', (e) =>
 			console.log(hist, _histCount, _current_input_history_size);
 			if (hist) msgInput.value = hist;
 		}
+	}
+	else if (e.ctrlKey && e.key === 'Enter')
+	{
+		e.preventDefault();
+		submitButton.click();
 	}
 });
 typingCheckbox.addEventListener('change', () =>

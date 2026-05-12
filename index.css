@@ -13,7 +13,7 @@
 	display: flex;
 	justify-content: space-between;
 }
-.input_area > input[type="text"]
+.input_area > textarea
 {
 	width: 100%;
 }
