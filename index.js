@@ -63,7 +63,7 @@ socket.addEventListener('open', () =>
 		_histCount = -1; //Сбрасываем листатель истории, чтобы по стрелочке вверх ввелась предыдущая команда.
 		if (msgInput.checkValidity())
 		{
-			const msgHtml = msgInput.value.replace(/\r/g, '').replace(/\n/g, '<br>')
+			const msgHtml = msgInput.value.replace(/\r/g, '').replace(/\n/g, '<br>');
 			const msg = USER_SESSION_ID + msgHtml;
 			const msgSize = new TextEncoder().encode(msg).length;
 			if (msgSize <= MAX_PAYLOAD)
@@ -144,7 +144,7 @@ socket.addEventListener('message', (e) =>
 			_typingTimeoutId = null;
 		}
 		const username = e.data.slice(7);
-		let users = '';
+		let users;
 		if (typingStatus.hidden)
 		{
 			typingStatus.hidden = false;
