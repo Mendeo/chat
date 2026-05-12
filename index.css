@@ -8,10 +8,6 @@
 	overflow-y: auto;
 	word-wrap: normal;
 }
-#chat-area form
-{
-	display: none;
-}
 .input_area
 {
 	display: flex;

@@ -52,7 +52,7 @@ function onUserActive()
 
 submitButton.disabled = false;
 chatArea.innerText = '';
-const socket = new WebSocket(`wss://${location.host}`);
+const socket = new WebSocket(`ws://${location.host}`);
 socket.addEventListener('open', () =>
 {
 	socket.send(USER_SESSION_ID + '+');
